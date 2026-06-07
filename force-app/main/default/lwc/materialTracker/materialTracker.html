@@ -1,0 +1,184 @@
+<template>
+    <lightning-card title="Materials &amp; Costs" icon-name="utility:product">
+        <div slot="actions">
+            <lightning-button
+                label="New Entry"
+                icon-name="utility:add"
+                onclick={handleNew}
+                variant="neutral">
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading materials" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-vertical_small" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:if={hasData}>
+                <!-- Cost totals -->
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_x-small">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Total Cost</p>
+                            <p class="slds-text-heading_small">
+                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code="INR" maximum-fraction-digits="0"></lightning-formatted-number>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_x-small">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Work</p>
+                            <p class="slds-text-heading_small">
+                                <lightning-formatted-number value={workTotal} format-style="currency" currency-code="INR" maximum-fraction-digits="0"></lightning-formatted-number>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_x-small">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Material</p>
+                            <p class="slds-text-heading_small">
+                                <lightning-formatted-number value={materialTotal} format-style="currency" currency-code="INR" maximum-fraction-digits="0"></lightning-formatted-number>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-m-bottom_x-small">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Cost</p>
+                            <p class="slds-text-heading_small">
+                                <lightning-formatted-number value={costTotal} format-style="currency" currency-code="INR" maximum-fraction-digits="0"></lightning-formatted-number>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Per-WBS budget consumption -->
+                <template lwc:if={hasWbsSummaries}>
+                    <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                        <template for:each={wbsSummaries} for:item="wbs">
+                            <div key={wbs.wbsItemId} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_x-small">
+                                <div class={wbs.cardClass}>
+                                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                        <div class="slds-truncate slds-text-heading_small" title={wbs.wbsItemName}>{wbs.wbsItemName}</div>
+                                        <template lwc:if={wbs.isOverBudget}>
+                                            <lightning-badge label="Over budget" class="slds-theme_error"></lightning-badge>
+                                        </template>
+                                    </div>
+                                    <div class="slds-m-top_x-small budget-track" role="progressbar"
+                                         aria-label="Budget consumed" aria-valuemin="0" aria-valuemax="100"
+                                         aria-valuenow={wbs.percentOfBudget}>
+                                        <div class={wbs.fillClass} style={wbs.fillStyle}></div>
+                                    </div>
+                                    <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small slds-text-body_small slds-text-color_weak">
+                                        <span>
+                                            <lightning-formatted-number value={wbs.totalCost} format-style="currency" currency-code="INR" maximum-fraction-digits="0"></lightning-formatted-number>
+                                            · {wbs.entryLabel}
+                                        </span>
+                                        <span>{wbs.percentLabel}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <lightning-datatable
+                    key-field="id"
+                    data={rows}
+                    columns={columns}
+                    hide-checkbox-column
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </template>
+
+            <template lwc:if={isEmpty}>
+                <div class="slds-illustration slds-illustration_small slds-align_absolute-center slds-p-around_large">
+                    <div class="slds-text-align_center">
+                        <lightning-icon icon-name="utility:product" size="large"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-top_medium">No materials logged yet</p>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                            Log materials and costs against WBS items to track budget consumption
+                        </p>
+                        <div class="slds-m-top_medium">
+                            <lightning-button
+                                label="Log First Entry"
+                                variant="brand"
+                                onclick={handleNew}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Add / Edit Modal -->
+    <template lwc:if={showModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                </header>
+
+                <lightning-record-edit-form
+                    object-api-name="Material_Log__c"
+                    record-id={editRecordId}
+                    onsubmit={handleSubmit}
+                    onsuccess={handleSaveSuccess}
+                    onerror={handleSaveError}>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-messages></lightning-messages>
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="WBS_Item__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="Material_Name__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="Cost_Type__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="Unit__c"></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="Quantity__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input-field field-name="Rate__c" required></lightning-input-field>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                        <lightning-button
+                            type="submit"
+                            label="Save"
+                            variant="brand"
+                            class="slds-m-left_x-small">
+                        </lightning-button>
+                    </footer>
+                </lightning-record-edit-form>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,165 @@
+/* ── Table shell ───────────────────────────────────────────────────── */
+.wbs-table {
+    overflow-x: auto;
+    border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    border-radius: .25rem;
+    background: #fff;
+    font-size: .8125rem;
+}
+
+/* ── Header ────────────────────────────────────────────────────────── */
+.wbs-header {
+    display: flex;
+    align-items: center;
+    min-width: 1120px;
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    border-bottom: 2px solid var(--slds-g-color-border-base-2, #d8d8d8);
+}
+.wbs-th {
+    padding: .5rem .625rem;
+    font-size: .6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--slds-g-color-neutral-base-30, #444);
+    white-space: nowrap;
+}
+
+/* ── Data rows ─────────────────────────────────────────────────────── */
+.wbs-row {
+    display: flex;
+    align-items: center;
+    min-width: 1120px;
+    border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    transition: background .1s;
+}
+.wbs-row:last-child { border-bottom: none; }
+
+.wbs-row-root {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    border-top: 2px solid var(--slds-g-color-border-base-2, #d8d8d8);
+}
+.wbs-row-root:first-of-type { border-top: none; }
+.wbs-row-branch { background: var(--slds-g-color-neutral-base-99, #fafafa); }
+.wbs-row-leaf   { background: #fff; }
+
+.wbs-row:hover { filter: brightness(.97); }
+
+.wbs-td {
+    padding: .5rem .625rem;
+    flex-shrink: 0;
+}
+/* pull action icon buttons together — each lightning-button-icon host carries its own padding */
+.wbs-col-actions lightning-button-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.wbs-col-actions .action-btn {
+    margin: 0 1px;
+}
+
+/* ── Column widths ─────────────────────────────────────────────────── */
+.wbs-col-name     { flex: 1; min-width: 240px; display: flex; align-items: center; overflow: hidden; }
+.wbs-col-dep      { flex: 0 0 170px; width: 170px; }
+.wbs-col-lag      { flex: 0 0 64px;  width: 64px; }
+.wbs-col-pred     { flex: 0 0 90px;  width: 90px; }
+.wbs-col-dur      { flex: 0 0 72px;  width: 72px; }
+.wbs-col-budget   { flex: 0 0 130px; width: 130px; }
+.wbs-col-progress { flex: 0 0 148px; width: 148px; }
+.wbs-td.wbs-col-progress { display: flex; align-items: center; gap: .4rem; }
+.th-progress { display: block; }
+.wbs-col-start    { flex: 0 0 100px; width: 100px; }
+.wbs-col-end      { flex: 0 0 100px; width: 100px; }
+.wbs-col-float    { flex: 0 0 64px;  width: 64px; }
+.wbs-col-actions  { flex: 0 0 84px;  width: 84px; display: flex; align-items: center; justify-content: center; gap: 0; padding: 0 .25rem; }
+
+.num { text-align: right !important; justify-content: flex-end; }
+
+/* ── Drag handle ───────────────────────────────────────────────────── */
+.drag-dots {
+    flex-shrink: 0;
+    color: var(--slds-g-color-neutral-base-60, #b0b0b0);
+    font-size: .55rem;
+    letter-spacing: 1px;
+    cursor: grab;
+    user-select: none;
+    margin-right: .25rem;
+    line-height: 1;
+}
+
+/* ── Name cell interior ────────────────────────────────────────────── */
+.name-inner {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: .25rem;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.toggle-placeholder {
+    display: inline-block;
+    width: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* ── WBS code chip ─────────────────────────────────────────────────── */
+.wbs-code {
+    color: #d97706;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: .8rem;
+}
+.wbs-code-root {
+    font-size: .875rem;
+    color: #b45309;
+}
+.wbs-code-critical { color: var(--slds-g-color-error-base-40, #ba0517) !important; }
+
+/* ── WBS name text ─────────────────────────────────────────────────── */
+.wbs-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+.wbs-name-root {
+    font-weight: 700;
+    font-size: .875rem;
+}
+.wbs-name-critical { color: var(--slds-g-color-error-base-40, #ba0517) !important; }
+
+/* ── Progress bar ──────────────────────────────────────────────────── */
+.progress-track {
+    flex: 1;
+    height: 8px;
+    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+    border-radius: 4px;
+    transition: width .3s ease;
+    min-width: 0;
+}
+.progress-pct {
+    font-size: .75rem;
+    color: var(--slds-g-color-neutral-base-30, #444);
+    white-space: nowrap;
+    min-width: 2.75rem;
+    text-align: right;
+    flex-shrink: 0;
+}

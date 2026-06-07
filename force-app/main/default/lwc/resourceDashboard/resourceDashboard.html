@@ -1,0 +1,122 @@
+<template>
+    <lightning-card title="Resource Utilization Dashboard" icon-name="utility:metrics">
+        <div slot="actions">
+            <lightning-button
+                label="Refresh"
+                icon-name="utility:refresh"
+                onclick={handleRefresh}
+                variant="neutral"
+                disabled={isRefreshing}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading utilization" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-vertical_small" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:if={hasData}>
+                <!-- KPI tiles -->
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Resources Allocated</p>
+                            <p class="slds-text-heading_large">{resourceCount}</p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Over-allocated</p>
+                            <p class={overAllocatedClass}>{overAllocatedCount}</p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title_caps slds-text-color_weak">Avg Monthly Load</p>
+                            <p class="slds-text-heading_large">{averageLoadLabel}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utilization heatmap -->
+                <table class="slds-table slds-table_bordered slds-table_fixed-layout heat-table"
+                       aria-label="Resource utilization by month">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" class="resource-col">
+                                <div class="slds-truncate" title="Resource">Resource</div>
+                            </th>
+                            <th scope="col" class="projects-col">
+                                <div class="slds-truncate" title="Projects">Projects</div>
+                            </th>
+                            <template for:each={monthLabels} for:item="month">
+                                <th key={month} scope="col" class="slds-text-align_center">
+                                    <div class="slds-truncate" title={month}>{month}</div>
+                                </th>
+                            </template>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.resourceId} class="slds-hint-parent">
+                                <th scope="row" class="resource-col">
+                                    <div class="slds-truncate" title={row.resourceName}>
+                                        {row.resourceName}
+                                        <template lwc:if={row.isOverAllocated}>
+                                            <lightning-icon
+                                                icon-name="utility:warning"
+                                                variant="error"
+                                                size="xx-small"
+                                                alternative-text="Over-allocated"
+                                                class="slds-m-left_x-small">
+                                            </lightning-icon>
+                                        </template>
+                                    </div>
+                                </th>
+                                <td class="projects-col">
+                                    <div class="slds-truncate slds-text-color_weak">{row.projectCountLabel}</div>
+                                </td>
+                                <template for:each={row.cells} for:item="cell">
+                                    <td key={cell.key} class={cell.cellClass} title={cell.title}>
+                                        {cell.label}
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+
+                <!-- Legend -->
+                <div class="slds-grid slds-grid_align-end slds-m-top_small slds-text-body_small">
+                    <span class="legend-swatch heat-cell_ok"></span>
+                    <span class="slds-m-right_small slds-m-left_xx-small">≤ 80%</span>
+                    <span class="legend-swatch heat-cell_warn"></span>
+                    <span class="slds-m-right_small slds-m-left_xx-small">81–100%</span>
+                    <span class="legend-swatch heat-cell_over"></span>
+                    <span class="slds-m-left_xx-small">&gt; 100% (over-allocated)</span>
+                </div>
+            </template>
+
+            <template lwc:if={isEmpty}>
+                <div class="slds-illustration slds-illustration_small slds-align_absolute-center slds-p-around_large">
+                    <div class="slds-text-align_center">
+                        <lightning-icon icon-name="utility:metrics" size="large"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-top_medium">No allocations in this window</p>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                            Allocate resources to projects to see utilization here
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

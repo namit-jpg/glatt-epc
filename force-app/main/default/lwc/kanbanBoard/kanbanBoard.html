@@ -1,0 +1,126 @@
+<template>
+    <lightning-card title="Kanban" icon-name="utility:kanban">
+        <div slot="actions">
+            <lightning-button
+                label="New Work Package"
+                icon-name="utility:add"
+                variant="neutral"
+                onclick={handleNewWP}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-vertical_small" role="alert">
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:if={hasData}>
+                <div class="board">
+                    <template for:each={columns} for:item="col">
+                        <div key={col.status}
+                             class="column"
+                             data-status={col.status}
+                             ondragover={handleDragOver}
+                             ondragleave={handleDragLeave}
+                             ondrop={handleDrop}>
+
+                            <div class="col-header" data-status={col.status}>
+                                <span class="col-label">{col.label}</span>
+                                <span class="col-count">{col.count}</span>
+                            </div>
+
+                            <div class="col-body">
+                                <template for:each={col.cards} for:item="card">
+                                    <div key={card.id}
+                                         class="card"
+                                         draggable="true"
+                                         data-id={card.id}
+                                         ondragstart={handleDragStart}
+                                         ondragend={handleDragEnd}>
+
+                                        <div class="card-name">{card.name}</div>
+                                        <div class="card-wbs">{card.wbsLabel}</div>
+
+                                        <template lwc:if={card.hasDate}>
+                                            <div class="card-meta">
+                                                <lightning-icon icon-name="utility:event" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                {card.displayStart}
+                                                <template lwc:if={card.displayEnd}>
+                                                    &nbsp;→&nbsp;{card.displayEnd}
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={card.assigneeName}>
+                                            <div class="card-meta">
+                                                <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                {card.assigneeName}
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <template lwc:if={col.isEmpty}>
+                                    <div class="empty-col">Drop cards here</div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- New Work Package Modal -->
+    <template lwc:if={showModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title">New Work Package</h2>
+                </header>
+
+                <lightning-record-edit-form
+                    object-api-name="Work_Package__c"
+                    onsuccess={handleSaveSuccess}
+                    onerror={handleSaveError}>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-messages></lightning-messages>
+                        <lightning-input-field field-name="WBS_Item__c"></lightning-input-field>
+                        <lightning-input-field field-name="Status__c"></lightning-input-field>
+                        <lightning-input-field field-name="Planned_Start__c"></lightning-input-field>
+                        <lightning-input-field field-name="Planned_End__c"></lightning-input-field>
+                        <lightning-input-field field-name="Assigned_To__c"></lightning-input-field>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                        <lightning-button
+                            type="submit"
+                            label="Save"
+                            variant="brand"
+                            class="slds-m-left_x-small">
+                        </lightning-button>
+                    </footer>
+                </lightning-record-edit-form>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

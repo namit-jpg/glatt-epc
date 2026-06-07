@@ -1,0 +1,180 @@
+<template>
+    <lightning-card title="Daily Progress" icon-name="utility:date_time">
+        <div slot="actions">
+            <lightning-button
+                label="Log Progress"
+                icon-name="utility:add"
+                onclick={handleNew}
+                variant="neutral">
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+            <template lwc:if={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-vertical_small" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:if={hasData}>
+                <template for:each={wbsGroups} for:item="group">
+                    <div key={group.wbsItemId} class="slds-m-bottom_medium">
+
+                        <div class="wbs-group-label slds-text-title_caps slds-text-color_weak slds-p-bottom_xx-small">
+                            {group.wbsItemName}
+                        </div>
+
+                        <template for:each={group.cards} for:item="card">
+                            <div key={card.id} class="slds-box slds-box_x-small wp-card slds-m-bottom_x-small">
+
+                                <!-- Card header -->
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-grow">
+                                        <div class="slds-text-heading_small">{card.name}</div>
+                                        <div class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                            <span class={card.statusClass}>{card.status}</span>
+                                            <template lwc:if={card.assignedTo}>
+                                                <span class="slds-m-left_x-small">{card.assignedTo}</span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <lightning-button-icon
+                                        icon-name="utility:add"
+                                        alternative-text="Log Progress"
+                                        title="Log Progress for this work package"
+                                        variant="border-filled"
+                                        size="small"
+                                        onclick={handleLogForWp}
+                                        data-wp-id={card.id}
+                                        data-wp-name={card.name}>
+                                    </lightning-button-icon>
+                                </div>
+
+                                <!-- Progress bar -->
+                                <div class="progress-track" role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100"
+                                     aria-valuenow={card.progressValue}>
+                                    <div class="progress-fill" style={card.progressStyle}></div>
+                                </div>
+                                <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small slds-text-body_small">
+                                    <span class="slds-text-color_weak">Completion</span>
+                                    <span class="progress-pct">{card.progressLabel}</span>
+                                </div>
+
+                                <!-- Recent entries -->
+                                <template lwc:if={card.hasEntries}>
+                                    <div class="slds-m-top_small entries-section">
+                                        <div class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">
+                                            Recent entries
+                                        </div>
+                                        <template for:each={card.entries} for:item="entry">
+                                            <div key={entry.id} class="entry-row slds-grid slds-grid_vertical-align-center slds-p-vertical_xx-small">
+                                                <div class="slds-grow slds-text-body_small">
+                                                    <span class="slds-text-heading_x-small">{entry.percentCompleteDay}%</span>
+                                                    <span class="slds-text-color_weak slds-m-left_x-small">{entry.progressDateFormatted}</span>
+                                                    <template lwc:if={entry.weather}>
+                                                        <span class="slds-m-left_x-small slds-text-color_weak">{entry.weather}</span>
+                                                    </template>
+                                                    <template lwc:if={entry.notes}>
+                                                        <span class="entry-notes slds-text-color_weak slds-m-left_x-small">{entry.notes}</span>
+                                                    </template>
+                                                </div>
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Delete entry"
+                                                    variant="bare"
+                                                    size="x-small"
+                                                    onclick={handleDeleteEntry}
+                                                    data-entry-id={entry.id}>
+                                                </lightning-button-icon>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </template>
+
+            <template lwc:if={isEmpty}>
+                <div class="slds-align_absolute-center slds-p-around_large slds-text-align_center">
+                    <lightning-icon icon-name="utility:date_time" size="large"></lightning-icon>
+                    <p class="slds-text-heading_small slds-m-top_medium">No work packages yet</p>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                        Add work packages to WBS items to start logging daily progress
+                    </p>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+
+    <!-- Log Progress Modal -->
+    <template lwc:if={showModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                </header>
+
+                <lightning-record-edit-form
+                    object-api-name="Daily_Progress__c"
+                    onsubmit={handleSubmit}
+                    onsuccess={handleSaveSuccess}
+                    onerror={handleSaveError}>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-messages></lightning-messages>
+
+                        <!-- WP selector only when not pre-filled -->
+                        <template lwc:if={showWpField}>
+                            <lightning-input-field field-name="Work_Package__c" required></lightning-input-field>
+                        </template>
+                        <template lwc:else>
+                            <div class="slds-form-element slds-m-bottom_small">
+                                <label class="slds-form-element__label">Work Package</label>
+                                <div class="slds-form-element__control">
+                                    <span class="slds-form-element__static">{selectedWpName}</span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <lightning-input-field field-name="Progress_Date__c" value={todayDate} required></lightning-input-field>
+                        <lightning-input-field field-name="Percent_Complete_Day__c" required></lightning-input-field>
+                        <lightning-input-field field-name="Weather__c"></lightning-input-field>
+                        <lightning-input-field field-name="Notes__c"></lightning-input-field>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                        <lightning-button
+                            type="submit"
+                            label="Save"
+                            variant="brand"
+                            class="slds-m-left_x-small">
+                        </lightning-button>
+                    </footer>
+                </lightning-record-edit-form>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,123 @@
+.board {
+    display: flex;
+    gap: 0.875rem;
+    overflow-x: auto;
+    align-items: flex-start;
+    padding-bottom: 0.5rem;
+}
+
+.column {
+    flex: 0 0 220px;
+    min-height: 360px;
+    border-radius: 6px;
+    background: var(--slds-g-color-neutral-base-95, #f4f6f9);
+    border: 2px solid transparent;
+    transition: border-color 0.15s;
+}
+
+.column.drag-over {
+    border-color: var(--slds-g-color-brand-base-40, #0176d3);
+}
+
+.col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px 6px 0 0;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.col-header[data-status="Planned"] {
+    background: var(--slds-g-color-neutral-base-80, #dddbda);
+    color: var(--slds-g-color-neutral-base-10, #3e3e3c);
+}
+
+.col-header[data-status="In Progress"] {
+    background: var(--slds-g-color-brand-base-80, #b3d4ff);
+    color: var(--slds-g-color-brand-base-10, #001639);
+}
+
+.col-header[data-status="Blocked"] {
+    background: var(--slds-g-color-error-base-80, #fdb6b6);
+    color: var(--slds-g-color-error-base-10, #640000);
+}
+
+.col-header[data-status="Complete"] {
+    background: var(--slds-g-color-success-base-80, #9ed69e);
+    color: var(--slds-g-color-success-base-10, #013a01);
+}
+
+.col-count {
+    background: rgba(0,0,0,0.12);
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+.col-body {
+    padding: 0.5rem;
+    min-height: 200px;
+}
+
+.card {
+    background: var(--slds-g-color-neutral-base-100, #fff);
+    border-radius: 4px;
+    padding: 0.625rem 0.75rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    cursor: grab;
+    border-left: 3px solid var(--slds-g-color-neutral-base-50, #b0adab);
+    transition: box-shadow 0.1s, opacity 0.1s;
+    user-select: none;
+}
+
+.card:active,
+.card.dragging {
+    cursor: grabbing;
+    opacity: 0.6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.column[data-status="In Progress"] .card { border-left-color: var(--slds-g-color-brand-base-50, #0176d3); }
+.column[data-status="Blocked"]     .card { border-left-color: var(--slds-g-color-error-base-50, #ba0517); }
+.column[data-status="Complete"]    .card { border-left-color: var(--slds-g-color-success-base-50, #2e7d32); }
+
+.card-name {
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-neutral-base-10, #3e3e3c);
+    margin-bottom: 2px;
+}
+
+.card-wbs {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-neutral-base-40, #706e6b);
+    margin-bottom: 0.375rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-neutral-base-40, #706e6b);
+    margin-top: 2px;
+}
+
+.empty-col {
+    text-align: center;
+    padding: 2rem 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-neutral-base-50, #b0adab);
+    border: 2px dashed var(--slds-g-color-neutral-base-80, #dddbda);
+    border-radius: 4px;
+}

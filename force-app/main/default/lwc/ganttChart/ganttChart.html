@@ -1,0 +1,54 @@
+<template>
+    <lightning-card title="Gantt Chart" icon-name="utility:scheduling">
+        <div slot="actions">
+            <lightning-button
+                label="Critical Path"
+                icon-name="utility:warning"
+                onclick={handleToggleCritical}
+                variant={criticalVariant}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <lightning-button-group>
+                <lightning-button label="Day"   data-mode="Day"   onclick={handleViewMode} variant={dayVariant}></lightning-button>
+                <lightning-button label="Week"  data-mode="Week"  onclick={handleViewMode} variant={weekVariant}></lightning-button>
+                <lightning-button label="Month" data-mode="Month" onclick={handleViewMode} variant={monthVariant}></lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template lwc:if={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading Gantt" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:if={hasError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:if={isEmpty}>
+                <div class="slds-text-align_center slds-p-around_large">
+                    <lightning-icon icon-name="utility:scheduling" size="large"></lightning-icon>
+                    <p class="slds-text-heading_small slds-m-top_medium">No schedulable WBS items</p>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small">
+                        Add Start Date and End Date to WBS items to see them on the Gantt chart
+                    </p>
+                </div>
+            </template>
+
+            <template lwc:if={showLegend}>
+                <div class="legend slds-grid slds-grid_vertical-align-center slds-m-bottom_small slds-text-body_small">
+                    <span class="legend-swatch legend-swatch_critical"></span>
+                    <span class="slds-m-right_medium">Critical path</span>
+                    <span class="legend-swatch legend-swatch_normal"></span>
+                    <span class="slds-m-right_medium">Normal task</span>
+                    <span class="slds-text-color_weak">{criticalSummary}</span>
+                </div>
+            </template>
+
+            <div class="gantt-container" lwc:ref="ganttContainer"></div>
+        </div>
+    </lightning-card>
+</template>

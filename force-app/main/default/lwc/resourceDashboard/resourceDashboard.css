@@ -1,0 +1,44 @@
+.heat-table {
+    table-layout: fixed;
+}
+
+.resource-col {
+    width: 16rem;
+}
+
+.projects-col {
+    width: 7rem;
+}
+
+.heat-cell {
+    text-align: center;
+    font-weight: 600;
+}
+
+.heat-cell_empty {
+    color: var(--slds-g-color-neutral-base-60, #747474);
+    font-weight: 400;
+}
+
+.heat-cell_ok {
+    background: var(--slds-g-color-success-base-90, #cdefc4);
+    color: var(--slds-g-color-success-base-30, #194e31);
+}
+
+.heat-cell_warn {
+    background: var(--slds-g-color-warning-base-90, #fbf3e0);
+    color: var(--slds-g-color-warning-base-30, #8c4b02);
+}
+
+.heat-cell_over {
+    background: var(--slds-g-color-error-base-90, #feded8);
+    color: var(--slds-g-color-error-base-30, #8e030f);
+}
+
+.legend-swatch {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.125rem;
+    align-self: center;
+}

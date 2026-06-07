@@ -1,0 +1,81 @@
+.wp-card {
+    background: var(--slds-g-color-neutral-base-100, #ffffff);
+}
+
+.wbs-group-label {
+    border-bottom: 1px solid var(--slds-g-color-neutral-base-80, #dddbda);
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.progress-track {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--slds-g-color-neutral-base-90, #f3f3f3);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 0.25rem;
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+    transition: width 0.3s ease;
+}
+
+.progress-pct {
+    font-weight: 600;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+.entries-section {
+    border-top: 1px solid var(--slds-g-color-neutral-base-90, #f3f3f3);
+    padding-top: 0.5rem;
+}
+
+.entry-row {
+    border-bottom: 1px solid var(--slds-g-color-neutral-base-95, #f8f8f8);
+}
+
+.entry-row:last-child {
+    border-bottom: none;
+}
+
+.entry-notes {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.status-planned {
+    background: var(--slds-g-color-neutral-base-80, #dddbda);
+    color: var(--slds-g-color-neutral-base-20, #3e3e3c);
+}
+
+.status-inprogress {
+    background: var(--slds-g-color-brand-base-95, #e8f4fd);
+    color: var(--slds-g-color-brand-base-40, #014486);
+}
+
+.status-blocked {
+    background: var(--slds-g-color-error-base-95, #fef1ee);
+    color: var(--slds-g-color-error-base-40, #ba0517);
+}
+
+.status-complete {
+    background: var(--slds-g-color-success-base-95, #effbe9);
+    color: var(--slds-g-color-success-base-40, #2e7d32);
+}

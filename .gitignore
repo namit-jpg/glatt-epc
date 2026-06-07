@@ -1,0 +1,15 @@
+# SFDX
+.sfdx/
+.sf/
+*.dup
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if any tooling added later)
+node_modules/

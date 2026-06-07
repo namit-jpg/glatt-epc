@@ -1,0 +1,24 @@
+.gantt-container {
+    overflow-x: auto;
+    min-height: 200px;
+}
+
+.gantt-container svg {
+    font-family: inherit;
+}
+
+.legend-swatch {
+    display: inline-block;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 0.2rem;
+    margin-right: 0.35rem;
+}
+
+.legend-swatch_critical {
+    background: var(--slds-g-color-error-base-40, #ea001e);
+}
+
+.legend-swatch_normal {
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+}

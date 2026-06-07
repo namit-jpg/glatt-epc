@@ -1,0 +1,212 @@
+/* ── Wrapper ─────────────────────────────── */
+.dashboard-wrap {
+    padding: 1rem 1.25rem 2rem;
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    min-height: 100vh;
+}
+
+/* ── Header ──────────────────────────────── */
+.dash-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--slds-g-color-neutral-base-80, #dddbda);
+}
+
+/* ── KPI cards ───────────────────────────── */
+.kpi-card {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    height: 100%;
+}
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+.kpi-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slds-g-color-neutral-base-50, #747474);
+}
+.kpi-sub {
+    font-size: 0.7rem;
+    color: var(--slds-g-color-neutral-base-50, #747474);
+}
+.kpi-card_blue  { border-top: 3px solid var(--slds-g-color-brand-base-50, #0176d3); }
+.kpi-card_green { border-top: 3px solid var(--slds-g-color-success-base-50, #2e844a); }
+.kpi-card_red   { border-top: 3px solid var(--slds-g-color-error-base-50, #ba0517); }
+
+/* ── Progress bars ───────────────────────── */
+.kpi-bar-track,
+.progress-track {
+    background: var(--slds-g-color-neutral-base-80, #dddbda);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-top: 0.4rem;
+}
+.kpi-bar-fill,
+.progress-fill {
+    height: 100%;
+    background: var(--slds-g-color-success-base-50, #2e844a);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+.progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.progress-wrap .progress-track { flex: 1; }
+.progress-pct {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-neutral-base-30, #3e3e3c);
+    white-space: nowrap;
+    min-width: 3rem;
+    text-align: right;
+}
+
+/* Spend bar (orange tone) */
+.spend-fill {
+    height: 100%;
+    background: var(--slds-g-color-warning-base-50, #dd7a01);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+.spend-row { margin-bottom: 0.6rem; }
+
+/* ── Panel cards ─────────────────────────── */
+.panel-card { background: #fff; }
+
+/* ── Portfolio table ─────────────────────── */
+.portfolio-table th,
+.crit-table th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-neutral-base-40, #5c5c5c);
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+}
+.portfolio-table td,
+.crit-table td { font-size: 0.8rem; vertical-align: middle; }
+
+/* ── Status badges ───────────────────────── */
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.status-badge_status-progress {
+    background: var(--slds-g-color-brand-base-90, #d9ecff);
+    color: var(--slds-g-color-brand-base-30, #014486);
+}
+.status-badge_status-done {
+    background: var(--slds-g-color-success-base-90, #cdefc4);
+    color: var(--slds-g-color-success-base-20, #1a5a2a);
+}
+.status-badge_status-hold {
+    background: var(--slds-g-color-warning-base-90, #fdefc3);
+    color: var(--slds-g-color-warning-base-20, #6e3a00);
+}
+.status-badge_status-plan {
+    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+    color: var(--slds-g-color-neutral-base-30, #3e3e3c);
+}
+
+/* ── BU badges ───────────────────────────── */
+.bu-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+.bu-badge_osd {
+    background: #e8d5fb;
+    color: #5a0fc8;
+}
+.bu-badge_steriles {
+    background: var(--slds-g-color-brand-base-90, #d9ecff);
+    color: var(--slds-g-color-brand-base-20, #032d60);
+}
+.bu-badge_oem {
+    background: var(--slds-g-color-success-base-90, #cdefc4);
+    color: var(--slds-g-color-success-base-20, #1a5a2a);
+}
+
+/* ── BU breakdown cards ──────────────────── */
+.bu-card {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--slds-g-color-neutral-base-90, #e5e5e5);
+}
+.bu-card:last-child { border-bottom: none; }
+
+/* ── Risk badges ─────────────────────────── */
+.risk-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.risk-badge_risk-critical {
+    background: var(--slds-g-color-error-base-90, #ffdede);
+    color: var(--slds-g-color-error-base-20, #7a0013);
+}
+.risk-badge_risk-warn {
+    background: var(--slds-g-color-warning-base-90, #fdefc3);
+    color: var(--slds-g-color-warning-base-20, #6e3a00);
+}
+.risk-badge_risk-ok {
+    background: var(--slds-g-color-success-base-90, #cdefc4);
+    color: var(--slds-g-color-success-base-20, #1a5a2a);
+}
+
+/* ── Log list ────────────────────────────── */
+.log-list { padding: 0; list-style: none; }
+.log-item { padding: 0.6rem 0; }
+.log-header { margin-bottom: 0.2rem; }
+.log-wp {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+.log-pct {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-success-base-30, #2e844a);
+    margin-right: 0.25rem;
+}
+.log-weather {
+    font-size: 0.72rem;
+    color: var(--slds-g-color-neutral-base-50, #747474);
+}
+.log-notes {
+    color: var(--slds-g-color-neutral-base-20, #3e3e3c);
+    margin: 0.1rem 0;
+    line-height: 1.4;
+}
+.log-meta {
+    margin-top: 0.15rem;
+    color: var(--slds-g-color-neutral-base-50, #747474);
+}
+
+code {
+    font-family: monospace;
+    font-size: 0.75rem;
+    background: var(--slds-g-color-neutral-base-92, #f0f0f0);
+    padding: 0 0.25rem;
+    border-radius: 3px;
+}
