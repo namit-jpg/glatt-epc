@@ -66,7 +66,12 @@
                                         <span class="toggle-placeholder"></span>
                                     </template>
                                     <span class={row.codeClass}>{row.wbsCode}</span>
-                                    <span class={row.nameClass}>{row.name}</span>
+                                    <span class={row.nameClass}
+                                          onclick={handleRowClick}
+                                          data-id={row.id}
+                                          data-label={row.name}
+                                          data-pct={row.progressRaw}
+                                          title="Click to log progress">{row.name}</span>
                                     <template lwc:if={row.isCritical}>
                                         <lightning-icon icon-name="utility:warning" size="xx-small" variant="error" class="slds-m-left_xx-small"></lightning-icon>
                                     </template>
@@ -88,8 +93,13 @@
                             <!-- budget -->
                             <div class="wbs-td wbs-col-budget num">{row.budgetFormatted}</div>
 
-                            <!-- progress bar + label -->
-                            <div class="wbs-td wbs-col-progress">
+                            <!-- progress bar + label (also clickable) -->
+                            <div class="wbs-td wbs-col-progress progress-cell-clickable"
+                                 onclick={handleRowClick}
+                                 data-id={row.id}
+                                 data-label={row.name}
+                                 data-pct={row.progressRaw}
+                                 title="Click to log progress">
                                 <div class="progress-track">
                                     <div class="progress-fill" style={row.progressFillStyle}></div>
                                 </div>
@@ -234,6 +244,90 @@
                         </lightning-button>
                     </footer>
                 </lightning-record-edit-form>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Log Progress Modal -->
+    <template lwc:if={showProgressModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeProgressModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">Log Progress</h2>
+                    <p class="slds-m-top_xx-small" style="color:rgba(255,255,255,.75);font-size:.8125rem;">{progressItemName}</p>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_large">
+
+                    <!-- Big slider area -->
+                    <div class="prog-slider-wrap">
+                        <div class="prog-display">{sliderDisplay}%</div>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="1"
+                            class="prog-slider"
+                            value={sliderValue}
+                            oninput={handleSliderInput}>
+                        <div class="prog-slider-labels">
+                            <span>0%</span>
+                            <span>25%</span>
+                            <span>50%</span>
+                            <span>75%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Exact number input -->
+                    <div class="slds-form-element slds-m-top_medium">
+                        <label class="slds-form-element__label" for="prog-exact">Exact %</label>
+                        <div class="slds-form-element__control">
+                            <input
+                                type="number"
+                                id="prog-exact"
+                                min="0"
+                                max="100"
+                                class="slds-input prog-exact-input"
+                                value={sliderValue}
+                                oninput={handleExactInput}>
+                        </div>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="slds-form-element slds-m-top_medium">
+                        <label class="slds-form-element__label" for="prog-notes">Remarks (optional)</label>
+                        <div class="slds-form-element__control">
+                            <textarea
+                                id="prog-notes"
+                                class="slds-textarea"
+                                rows="2"
+                                placeholder="Any notes for this update…"
+                                oninput={handleNotesInput}></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeProgressModal}></lightning-button>
+                    <lightning-button
+                        label="Save Progress"
+                        variant="brand"
+                        class="slds-m-left_x-small"
+                        onclick={handleProgressSave}
+                        disabled={isSavingProgress}>
+                    </lightning-button>
+                </footer>
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>

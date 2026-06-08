@@ -75,6 +75,13 @@ public with sharing class WBSTreeController {
         delete [SELECT Id FROM WBS_Item__c WHERE Id = :itemId WITH SECURITY_ENFORCED LIMIT 1];
     }
 
+    @AuraEnabled
+    public static void saveProgress(Id itemId, Decimal progressPct, Id projectId) {
+        WBS_Item__c item = new WBS_Item__c(Id = itemId, Progress__c = progressPct);
+        update item;
+        CPMEngine.recalculate(projectId);
+    }
+
     public class GanttTask {
         @AuraEnabled public String  id;
         @AuraEnabled public String  name;
