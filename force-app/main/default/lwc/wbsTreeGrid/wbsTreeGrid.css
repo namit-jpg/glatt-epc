@@ -140,6 +140,18 @@
 }
 .wbs-name-critical { color: var(--slds-g-color-error-base-40, #ba0517) !important; }
 
+/* Clickable name — underline on hover, pointer cursor */
+.wbs-name-link {
+    cursor: pointer;
+}
+.wbs-name-link:hover {
+    text-decoration: underline;
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.wbs-name-critical.wbs-name-link:hover {
+    color: var(--slds-g-color-error-base-40, #ba0517);
+}
+
 /* ── Progress bar ──────────────────────────────────────────────────── */
 .progress-track {
     flex: 1;
@@ -162,4 +174,74 @@
     min-width: 2.75rem;
     text-align: right;
     flex-shrink: 0;
+}
+
+/* Clickable progress cell */
+.progress-cell-clickable {
+    cursor: pointer;
+    border-radius: .25rem;
+    transition: background .15s;
+}
+.progress-cell-clickable:hover {
+    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+}
+
+/* ── Log Progress modal slider ─────────────────────────────────────── */
+.prog-slider-wrap {
+    text-align: center;
+    padding: .5rem 0 0;
+}
+
+.prog-display {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.prog-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+    outline: none;
+    cursor: pointer;
+}
+.prog-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(1,118,211,.35);
+    transition: background .15s;
+}
+.prog-slider::-webkit-slider-thumb:hover {
+    background: var(--slds-g-color-brand-base-40, #014486);
+}
+.prog-slider::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+    cursor: pointer;
+    border: none;
+}
+
+.prog-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: .6875rem;
+    color: var(--slds-g-color-neutral-base-50, #8e8e8e);
+    margin-top: .375rem;
+}
+
+.prog-exact-input {
+    max-width: 8rem;
+    text-align: center;
+    font-size: 1.125rem;
+    font-weight: 600;
 }

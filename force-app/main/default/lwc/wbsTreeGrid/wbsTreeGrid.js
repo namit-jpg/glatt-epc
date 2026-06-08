@@ -4,6 +4,7 @@ import { refreshApex } from '@salesforce/apex';
 import getWBSTree from '@salesforce/apex/WBSTreeController.getWBSTree';
 import deleteWBSItem from '@salesforce/apex/WBSTreeController.deleteWBSItem';
 import runCPM from '@salesforce/apex/WBSTreeController.runCPM';
+import saveProgress from '@salesforce/apex/WBSTreeController.saveProgress';
 
 const DEP_LABELS = {
     FS: 'Finish-to-Start (FS)',
@@ -31,6 +32,15 @@ export default class WbsTreeGrid extends LightningElement {
     @track editRecordId;
     @track parentId;
     @track modalTitle = 'New WBS Item';
+
+    // Progress modal state
+    @track showProgressModal = false;
+    @track progressRecordId;
+    @track progressItemName;
+    @track sliderValue = 0;
+    @track sliderDisplay = 0;
+    @track _progressNotes = '';
+    @track isSavingProgress = false;
 
     _wiredResult;
     _expandedIds = new Set();
@@ -111,12 +121,13 @@ export default class WbsTreeGrid extends LightningElement {
                 floatDisplay:     n.floatDays != null ? String(n.floatDays) : '',
                 startFormatted:   fmtDate(n.displayStart),
                 endFormatted:     fmtDate(n.displayEnd),
+                progressRaw:      Math.round(pct),
                 isCritical,
                 rowClass:         cls,
                 indentStyle:      `margin-left:${depth * 1.25}rem`,
                 toggleIcon:       isExpanded ? 'utility:chevrondown' : 'utility:chevronright',
                 codeClass:        ['wbs-code', isRoot ? 'wbs-code-root' : '', isCritical ? 'wbs-code-critical' : ''].filter(Boolean).join(' '),
-                nameClass:        ['wbs-name', isRoot ? 'wbs-name-root' : '', isCritical ? 'wbs-name-critical' : ''].filter(Boolean).join(' '),
+                nameClass:        ['wbs-name wbs-name-link', isRoot ? 'wbs-name-root' : '', isCritical ? 'wbs-name-critical' : ''].filter(Boolean).join(' '),
                 progressFillStyle: `width:${Math.min(pct, 100)}%`,
                 progressLabel:    `${Math.round(pct)}%`
             });
@@ -207,6 +218,65 @@ export default class WbsTreeGrid extends LightningElement {
         this.showModal    = false;
         this.editRecordId = undefined;
         this.parentId     = undefined;
+    }
+
+    // ── Progress modal ───────────────────────────────────────────────────
+
+    handleRowClick(event) {
+        // Don't open if clicking on action buttons (they stop propagation, so this
+        // is just a safety guard — event.target check ensures we're on the name/bar)
+        const id  = event.currentTarget.dataset.id;
+        const lbl = event.currentTarget.dataset.label;
+        const pct = parseInt(event.currentTarget.dataset.pct ?? '0', 10);
+
+        this.progressRecordId  = id;
+        this.progressItemName  = lbl;
+        this.sliderValue       = pct;
+        this.sliderDisplay     = pct;
+        this._progressNotes    = '';
+        this.showProgressModal = true;
+    }
+
+    handleSliderInput(event) {
+        const v = parseInt(event.target.value, 10);
+        this.sliderValue   = v;
+        this.sliderDisplay = v;
+    }
+
+    handleExactInput(event) {
+        let v = parseInt(event.target.value, 10);
+        if (isNaN(v)) v = 0;
+        v = Math.min(100, Math.max(0, v));
+        this.sliderValue   = v;
+        this.sliderDisplay = v;
+    }
+
+    handleNotesInput(event) {
+        this._progressNotes = event.target.value;
+    }
+
+    async handleProgressSave() {
+        this.isSavingProgress = true;
+        try {
+            await saveProgress({
+                itemId:      this.progressRecordId,
+                progressPct: this.sliderValue,
+                projectId:   this.recordId
+            });
+            this.showProgressModal = false;
+            this.toast('Progress Updated', `${this.progressItemName} → ${this.sliderValue}%`, 'success');
+            await refreshApex(this._wiredResult);
+        } catch (e) {
+            this.toast('Save Error', e.body?.message ?? 'Failed to save progress', 'error');
+        } finally {
+            this.isSavingProgress = false;
+        }
+    }
+
+    closeProgressModal() {
+        this.showProgressModal = false;
+        this.progressRecordId  = undefined;
+        this.progressItemName  = undefined;
     }
 
     toast(title, message, variant) {
