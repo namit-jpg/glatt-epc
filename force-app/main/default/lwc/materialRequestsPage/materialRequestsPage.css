@@ -1,0 +1,239 @@
+/* ── Page wrapper ── */
+.mrp-page {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ── Header ── */
+.mrp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.mrp-title {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Filter pills ── */
+.mrp-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.filter-pill {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    border: 1px solid var(--slds-g-color-border-base-1, #dddbda);
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    color: var(--slds-g-color-neutral-base-30, #3e3e3c);
+    white-space: nowrap;
+}
+
+.filter-pill:hover {
+    background: #e8f4fd;
+    border-color: var(--slds-g-color-brand-base-50, #0176d3);
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+
+.filter-pill.active {
+    background: var(--slds-g-color-brand-base-50, #0176d3);
+    border-color: var(--slds-g-color-brand-base-50, #0176d3);
+    color: #fff;
+    font-weight: 700;
+}
+
+.pill-badge {
+    background: #ea001e;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.5;
+    min-width: 18px;
+    text-align: center;
+}
+
+.filter-pill.active .pill-badge {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ── Cards grid ── */
+.mrp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* Mobile: single column */
+@media (max-width: 480px) {
+    .mrp-grid {
+        grid-template-columns: 1fr;
+    }
+    .mrp-page {
+        padding: 0.75rem;
+    }
+}
+
+/* ── Card ── */
+.mrp-card {
+    background: #fff;
+    border: 1px solid var(--slds-g-color-border-base-1, #dddbda);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    transition: box-shadow 0.15s;
+}
+
+.mrp-card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.card-material {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    line-height: 1.3;
+}
+
+.card-context {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+}
+
+.ctx-icon { color: var(--slds-g-color-neutral-base-50, #706e6b); }
+.ctx-project { font-weight: 600; color: var(--slds-g-color-brand-base-50, #0176d3); }
+.ctx-sep { color: var(--slds-g-color-neutral-base-50, #706e6b); }
+.ctx-wbs { color: var(--slds-g-color-neutral-base-40, #514f4d); }
+
+.card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 0.75rem;
+}
+
+.kv {
+    display: flex;
+    flex-direction: column;
+}
+
+.kv-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+}
+
+.kv-val {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+.card-rejection {
+    background: #fef0f0;
+    border-left: 3px solid #c23934;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.8rem;
+    color: #7b2020;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.card-notes {
+    font-size: 0.8rem;
+    color: var(--slds-g-color-neutral-base-40, #514f4d);
+    font-style: italic;
+    border-top: 1px solid var(--slds-g-color-border-base-1, #dddbda);
+    padding-top: 0.5rem;
+    margin-top: 0.1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--slds-g-color-border-base-1, #dddbda);
+}
+
+.action-btn { flex: 1; }
+
+.approved-label {
+    font-size: 0.8125rem;
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+/* ── Status pills ── */
+.status-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.pill-draft     { background: #f3f3f3; color: #3e3e3c; }
+.pill-pending   { background: #fff3cd; color: #856404; }
+.pill-approved  { background: #d4edda; color: #155724; }
+.pill-rejected  { background: #f8d7da; color: #721c24; }
+
+/* ── Empty / Error states ── */
+.mrp-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+}
+
+.mrp-error {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8d7da;
+    border-radius: 6px;
+    color: #721c24;
+}

@@ -1,0 +1,238 @@
+<template>
+    <div class="mrm-container">
+
+        <!-- ── Header ── -->
+        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_medium">
+            <h2 class="slds-text-heading_medium">Material Requests</h2>
+            <lightning-button label="New Request" variant="brand" icon-name="utility:add" onclick={openNewRequestModal}></lightning-button>
+        </div>
+
+        <!-- ── Filter tabs ── -->
+        <div class="filter-tabs slds-m-bottom_small">
+            <button class={allTabClass} onclick={filterAll}>All ({allCount})</button>
+            <button class={pendingTabClass} onclick={filterPending}>
+                Pending Approval
+                <template if:true={pendingCount}>
+                    <span class="badge-count">{pendingCount}</span>
+                </template>
+            </button>
+            <button class={myTabClass} onclick={filterMine}>My Requests ({myCount})</button>
+        </div>
+
+        <!-- ── Requests list ── -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading requests" size="small"></lightning-spinner>
+        </template>
+        <template if:false={isLoading}>
+            <template if:true={hasError}>
+                <div class="error-panel">
+                    <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                    <span class="slds-m-left_x-small">{errorMessage}</span>
+                </div>
+            </template>
+            <template if:false={hasError}>
+                <template if:true={isEmpty}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:inbox" size="medium" variant="bare"></lightning-icon>
+                        <p class="slds-m-top_small slds-text-color_weak">No requests found.</p>
+                    </div>
+                </template>
+                <template if:false={isEmpty}>
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col" style="width:100px">Request #</th>
+                                <th scope="col" style="width:180px">WBS Item</th>
+                                <th scope="col">Material</th>
+                                <th scope="col" style="width:110px">Qty / Unit</th>
+                                <th scope="col" style="width:110px">Required By</th>
+                                <th scope="col" style="width:90px">Status</th>
+                                <th scope="col" style="width:120px">Requested By</th>
+                                <th scope="col" style="width:200px">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={filteredRequests} for:item="r">
+                                <tr key={r.id}>
+                                    <td>{r.name}</td>
+                                    <td class="slds-truncate" title={r.wbsItemName}>{r.wbsItemName}</td>
+                                    <td class="slds-truncate" title={r.materialName}>{r.materialName}</td>
+                                    <td>{r.quantityLabel}</td>
+                                    <td>{r.requiredDateLabel}</td>
+                                    <td>
+                                        <span class={r.statusClass}>{r.statusLabel}</span>
+                                    </td>
+                                    <td class="slds-truncate">{r.requestedByName}</td>
+                                    <td>
+                                        <!-- Draft: Submit + Delete -->
+                                        <template if:true={r.isDraft}>
+                                            <lightning-button-group>
+                                                <lightning-button label="Submit" variant="brand-outline" size="xx-small"
+                                                    data-id={r.id} onclick={handleSubmit}></lightning-button>
+                                                <lightning-button label="Delete" variant="destructive-text" size="xx-small"
+                                                    data-id={r.id} onclick={handleDelete}></lightning-button>
+                                            </lightning-button-group>
+                                        </template>
+                                        <!-- Submitted: Approve + Reject -->
+                                        <template if:true={r.isSubmitted}>
+                                            <lightning-button-group>
+                                                <lightning-button label="Approve" variant="success" size="xx-small"
+                                                    data-id={r.id} onclick={handleApprove}></lightning-button>
+                                                <lightning-button label="Reject" variant="destructive-text" size="xx-small"
+                                                    data-id={r.id} onclick={openRejectModal}></lightning-button>
+                                            </lightning-button-group>
+                                        </template>
+                                        <!-- Approved: View RFQ -->
+                                        <template if:true={r.isApproved}>
+                                            <template if:true={r.rfqId}>
+                                                <lightning-button label="View RFQ →" variant="base" size="xx-small"
+                                                    data-id={r.rfqId} onclick={navigateToRfq}></lightning-button>
+                                            </template>
+                                            <template if:false={r.rfqId}>
+                                                <span class="slds-text-color_success slds-text-body_small">✓ Approved</span>
+                                            </template>
+                                        </template>
+                                        <!-- Rejected: show reason tooltip -->
+                                        <template if:true={r.isRejected}>
+                                            <span class="slds-text-color_error slds-text-body_small"
+                                                  title={r.rejectionReason}>✗ Rejected</span>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+            </template>
+        </template>
+
+        <!-- ── RFQs section ── -->
+        <template if:true={hasRfqs}>
+            <div class="slds-m-top_large">
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                    <h3 class="slds-text-heading_small">Request for Quotes (RFQs)</h3>
+                </div>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" style="width:120px">RFQ #</th>
+                            <th scope="col" style="width:130px">Material Request</th>
+                            <th scope="col" style="width:100px">Status</th>
+                            <th scope="col">Vendor</th>
+                            <th scope="col" style="width:120px">Expected Delivery</th>
+                            <th scope="col" style="width:130px">Est. Value</th>
+                            <th scope="col" style="width:80px">Open</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rfqRows} for:item="q">
+                            <tr key={q.id}>
+                                <td>{q.name}</td>
+                                <td class="slds-truncate">{q.materialRequestName}</td>
+                                <td><span class={q.statusClass}>{q.statusLabel}</span></td>
+                                <td class="slds-truncate">{q.vendor}</td>
+                                <td>{q.expectedDeliveryLabel}</td>
+                                <td>{q.estimatedValueLabel}</td>
+                                <td>
+                                    <lightning-button label="Open" variant="base" size="xx-small"
+                                        data-id={q.id} onclick={navigateToRfq}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+    </div>
+
+    <!-- ══════════════ NEW REQUEST MODAL ══════════════ -->
+    <template if:true={showNewModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        class="slds-modal__close" onclick={closeNewModal}></lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">New Material Request</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox label="WBS Item" value={newWbsItemId} options={wbsOptions}
+                        placeholder="Select WBS Item" required
+                        onchange={handleWbsChange}></lightning-combobox>
+                    <div class="slds-m-top_small">
+                        <lightning-combobox label="Material / Product" value={newProductId}
+                            options={productOptions} placeholder="Select a product" required
+                            onchange={handleProductChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-grid slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_2-of-3">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Quantity</label>
+                                <div class="slds-form-element__control">
+                                    <input type="number" class="slds-input" value={newQuantity}
+                                        placeholder="0" min="0" step="0.01" oninput={handleQuantityChange} />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <lightning-combobox label="Unit" value={newUnit} options={unitOptions}
+                                onchange={handleUnitChange}></lightning-combobox>
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-m-top_small">
+                        <label class="slds-form-element__label">Required By</label>
+                        <div class="slds-form-element__control">
+                            <input type="date" class="slds-input" value={newRequiredDate}
+                                oninput={handleDateChange} />
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-m-top_small">
+                        <label class="slds-form-element__label">Notes</label>
+                        <div class="slds-form-element__control">
+                            <textarea class="slds-textarea" rows="3" value={newNotes}
+                                placeholder="Any additional details…" oninput={handleNotesChange}></textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeNewModal}></lightning-button>
+                    <lightning-button label="Save Request" variant="brand"
+                        disabled={isSaving} onclick={saveNewRequest}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ══════════════ REJECT MODAL ══════════════ -->
+    <template if:true={showRejectModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container" style="max-width:480px">
+                <header class="slds-modal__header slds-theme_error">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        class="slds-modal__close" onclick={closeRejectModal}></lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">Reject Request</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required">*</abbr>Reason for Rejection
+                        </label>
+                        <div class="slds-form-element__control">
+                            <textarea class="slds-textarea" rows="4" value={rejectionReason}
+                                placeholder="Explain why this request is being rejected…"
+                                oninput={handleReasonChange}></textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button label="Confirm Reject" variant="destructive"
+                        disabled={isRejecting} onclick={confirmReject}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+</template>

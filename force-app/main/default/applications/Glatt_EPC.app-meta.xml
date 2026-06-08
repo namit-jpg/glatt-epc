@@ -9,6 +9,8 @@
     <tabs>Project__c</tabs>
     <tabs>Resource_Dashboard</tabs>
     <tabs>EPC_Dashboard</tabs>
+    <tabs>Material_Requests</tabs>
+    <tabs>RFQ__c</tabs>
     <uiType>Lightning</uiType>
     <formFactors>Large</formFactors>
     <formFactors>Small</formFactors>

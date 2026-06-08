@@ -1,0 +1,251 @@
+<template>
+    <div class="mrp-page">
+
+        <!-- ── Header ── -->
+        <div class="mrp-header">
+            <div class="mrp-title">
+                <lightning-icon icon-name="utility:package" size="small" class="slds-m-right_x-small"></lightning-icon>
+                <h1 class="slds-text-heading_medium">Material Requests</h1>
+            </div>
+            <lightning-button label="New Request" variant="brand" icon-name="utility:add"
+                onclick={openNewModal}></lightning-button>
+        </div>
+
+        <!-- ── Filter pills ── -->
+        <div class="mrp-filters">
+            <button class={allPillClass} onclick={filterAll}>All ({allCount})</button>
+            <button class={myPillClass}  onclick={filterMine}>My Requests ({myCount})</button>
+            <button class={pendingPillClass} onclick={filterPending}>
+                Pending Approval
+                <template if:true={pendingCount}>
+                    <span class="pill-badge">{pendingCount}</span>
+                </template>
+            </button>
+        </div>
+
+        <!-- ── Content ── -->
+        <template if:true={isLoading}>
+            <div class="slds-align_absolute-center slds-p-around_large">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:true={hasError}>
+                <div class="mrp-error">
+                    <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                    <span class="slds-m-left_x-small">{errorMessage}</span>
+                </div>
+            </template>
+
+            <template if:false={hasError}>
+                <template if:true={isEmpty}>
+                    <div class="mrp-empty">
+                        <lightning-icon icon-name="utility:inbox" size="large" variant="bare"></lightning-icon>
+                        <p class="slds-m-top_medium slds-text-heading_small">No requests found</p>
+                        <p class="slds-text-color_weak slds-m-top_x-small">Click "New Request" to get started.</p>
+                    </div>
+                </template>
+
+                <template if:false={isEmpty}>
+                    <div class="mrp-grid">
+                        <template for:each={filteredRequests} for:item="r">
+                            <div key={r.id} class="mrp-card">
+                                <!-- Card top row: request # + status -->
+                                <div class="card-top">
+                                    <span class="card-num">{r.name}</span>
+                                    <span class={r.statusClass}>{r.statusLabel}</span>
+                                </div>
+
+                                <!-- Material name -->
+                                <div class="card-material">{r.materialName}</div>
+
+                                <!-- Project + WBS -->
+                                <div class="card-context">
+                                    <lightning-icon icon-name="utility:builder" size="xx-small"
+                                        class="slds-m-right_xx-small ctx-icon"></lightning-icon>
+                                    <span class="ctx-project">{r.projectName}</span>
+                                    <template if:true={r.wbsItemName}>
+                                        <span class="ctx-sep"> › </span>
+                                        <span class="ctx-wbs">{r.wbsItemName}</span>
+                                    </template>
+                                </div>
+
+                                <!-- Key details row -->
+                                <div class="card-details">
+                                    <div class="kv">
+                                        <span class="kv-label">Quantity</span>
+                                        <span class="kv-val">{r.quantityLabel}</span>
+                                    </div>
+                                    <div class="kv">
+                                        <span class="kv-label">Required By</span>
+                                        <span class="kv-val">{r.requiredDateLabel}</span>
+                                    </div>
+                                    <div class="kv">
+                                        <span class="kv-label">Raised By</span>
+                                        <span class="kv-val">{r.requestedByName}</span>
+                                    </div>
+                                    <template if:true={r.approvedByName}>
+                                        <div class="kv">
+                                            <span class="kv-label">Approved By</span>
+                                            <span class="kv-val">{r.approvedByName}</span>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Rejection reason -->
+                                <template if:true={r.isRejected}>
+                                    <div class="card-rejection">
+                                        <lightning-icon icon-name="utility:ban" size="xx-small"
+                                            variant="error" class="slds-m-right_xx-small"></lightning-icon>
+                                        {r.rejectionReason}
+                                    </div>
+                                </template>
+
+                                <!-- Notes preview -->
+                                <template if:true={r.notes}>
+                                    <div class="card-notes">{r.notes}</div>
+                                </template>
+
+                                <!-- Actions -->
+                                <div class="card-actions">
+                                    <template if:true={r.isDraft}>
+                                        <lightning-button label="Submit for Approval" variant="brand"
+                                            data-id={r.id} onclick={handleSubmit}
+                                            class="action-btn"></lightning-button>
+                                        <lightning-button label="Delete" variant="destructive-text"
+                                            data-id={r.id} onclick={handleDelete}></lightning-button>
+                                    </template>
+                                    <template if:true={r.isSubmitted}>
+                                        <lightning-button label="✓ Approve" variant="success"
+                                            data-id={r.id} onclick={handleApprove}
+                                            class="action-btn"></lightning-button>
+                                        <lightning-button label="✗ Reject" variant="destructive"
+                                            data-id={r.id} onclick={openRejectModal}></lightning-button>
+                                    </template>
+                                    <template if:true={r.isApproved}>
+                                        <template if:true={r.rfqId}>
+                                            <lightning-button label="View RFQ →" variant="brand-outline"
+                                                data-id={r.rfqId} onclick={navigateToRfq}
+                                                class="action-btn"></lightning-button>
+                                        </template>
+                                        <template if:false={r.rfqId}>
+                                            <span class="approved-label">✓ Approved — RFQ pending</span>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+    </div>
+
+    <!-- ══════════════ NEW REQUEST MODAL ══════════════ -->
+    <template if:true={showNewModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        class="slds-modal__close" onclick={closeNewModal}></lightning-button-icon>
+                    <h2 class="slds-modal__title">New Material Request</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+
+                    <!-- Step 1: Project + WBS -->
+                    <lightning-combobox label="Project" value={newProjectId} options={projectOptions}
+                        placeholder="Select project" required
+                        onchange={handleProjectChange}></lightning-combobox>
+
+                    <div class="slds-m-top_small">
+                        <lightning-combobox label="WBS Item" value={newWbsItemId} options={wbsOptions}
+                            placeholder={wbsPlaceholder} required disabled={wbsDisabled}
+                            onchange={handleWbsChange}></lightning-combobox>
+                    </div>
+
+                    <!-- Product selection -->
+                    <div class="slds-m-top_small">
+                        <lightning-combobox label="Material / Product" value={newProductId}
+                            options={productOptions} placeholder="Select a product" required
+                            onchange={handleProductChange}></lightning-combobox>
+                    </div>
+
+                    <div class="slds-grid slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_2-of-3">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Quantity</label>
+                                <div class="slds-form-element__control">
+                                    <input type="number" class="slds-input" value={newQuantity}
+                                        placeholder="0" min="0" step="0.01" oninput={handleQuantityChange} />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <lightning-combobox label="Unit" value={newUnit} options={unitOptions}
+                                onchange={handleUnitChange}></lightning-combobox>
+                        </div>
+                    </div>
+
+                    <div class="slds-form-element slds-m-top_small">
+                        <label class="slds-form-element__label">Required By</label>
+                        <div class="slds-form-element__control">
+                            <input type="date" class="slds-input" value={newRequiredDate}
+                                oninput={handleDateChange} />
+                        </div>
+                    </div>
+
+                    <div class="slds-form-element slds-m-top_small">
+                        <label class="slds-form-element__label">Notes</label>
+                        <div class="slds-form-element__control">
+                            <textarea class="slds-textarea" rows="3" value={newNotes}
+                                placeholder="Any additional details…" oninput={handleNotesChange}></textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeNewModal}></lightning-button>
+                    <lightning-button label="Save as Draft" variant="neutral"
+                        disabled={isSaving} onclick={saveNewRequest}
+                        data-submit="false"></lightning-button>
+                    <lightning-button label="Submit for Approval" variant="brand"
+                        disabled={isSaving} onclick={saveAndSubmit}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ══════════════ REJECT MODAL ══════════════ -->
+    <template if:true={showRejectModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container" style="max-width:480px">
+                <header class="slds-modal__header slds-theme_error">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        class="slds-modal__close" onclick={closeRejectModal}></lightning-button-icon>
+                    <h2 class="slds-modal__title">Reject Request</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required">*</abbr>Reason for Rejection
+                        </label>
+                        <div class="slds-form-element__control">
+                            <textarea class="slds-textarea" rows="4" value={rejectionReason}
+                                placeholder="Explain why this request is being rejected…"
+                                oninput={handleReasonChange}></textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button label="Confirm Reject" variant="destructive"
+                        disabled={isRejecting} onclick={confirmReject}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+</template>

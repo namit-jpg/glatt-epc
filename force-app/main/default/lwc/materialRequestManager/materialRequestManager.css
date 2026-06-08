@@ -1,0 +1,119 @@
+.mrm-container {
+    padding: 1rem;
+}
+
+/* Filter tabs */
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--slds-g-color-border-base-1, #e0e5ee);
+    padding-bottom: 0;
+    margin-bottom: 1rem;
+}
+
+.filter-tab {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-neutral-base-40, #514f4d);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.filter-tab:hover {
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+
+.filter-tab.active {
+    color: var(--slds-g-color-brand-base-50, #0176d3);
+    border-bottom-color: var(--slds-g-color-brand-base-50, #0176d3);
+    font-weight: 700;
+}
+
+/* Pending count badge */
+.badge-count {
+    background: var(--slds-g-color-error-base-40, #c23934);
+    color: #fff;
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.4;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-draft {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    color: var(--slds-g-color-neutral-base-30, #3e3e3c);
+}
+
+.status-submitted {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-info {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-closed {
+    background: var(--slds-g-color-neutral-base-80, #c9c9c9);
+    color: var(--slds-g-color-neutral-base-30, #3e3e3c);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+}
+
+/* Error panel */
+.error-panel {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8d7da;
+    border-radius: 4px;
+    color: #721c24;
+}
+
+/* Table tweaks */
+.slds-table th,
+.slds-table td {
+    font-size: 0.8125rem;
+    vertical-align: middle;
+}
+
+.slds-table thead th {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    font-weight: 700;
+}
