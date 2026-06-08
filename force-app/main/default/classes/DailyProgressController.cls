@@ -3,7 +3,7 @@ public with sharing class DailyProgressController {
     @AuraEnabled(cacheable=true)
     public static ProgressBoard getProgressBoard(Id projectId) {
         List<Work_Package__c> wps = [
-            SELECT Id, Name, Status__c, Planned_Start__c, Planned_End__c,
+            SELECT Id, Name, WP_Code__c, Status__c, Planned_Start__c, Planned_End__c,
                    Assigned_To__r.Name,
                    WBS_Item__c, WBS_Item__r.Name, WBS_Item__r.WBS_Code__c
             FROM Work_Package__c
@@ -80,7 +80,7 @@ public with sharing class DailyProgressController {
 
         public WpCard(Work_Package__c wp) {
             this.id          = wp.Id;
-            this.name        = wp.Name;
+            this.name        = wp.WP_Code__c != null ? wp.WP_Code__c : wp.Name;
             this.status      = wp.Status__c;
             this.plannedStart = wp.Planned_Start__c;
             this.plannedEnd  = wp.Planned_End__c;

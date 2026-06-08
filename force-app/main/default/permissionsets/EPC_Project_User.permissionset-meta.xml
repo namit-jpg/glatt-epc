@@ -301,6 +301,12 @@
         <readable>true</readable>
     </fieldPermissions>
 
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Work_Package__c.WP_Code__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
     <!-- Resource_Allocation__c Field Permissions -->
     <fieldPermissions>
         <editable>true</editable>

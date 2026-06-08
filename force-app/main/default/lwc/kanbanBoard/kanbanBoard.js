@@ -37,7 +37,7 @@ export default class KanbanBoard extends LightningElement {
         if (result.data) {
             this._cards = result.data.map(c => ({
                 ...c,
-                wbsLabel: (c.wbsCode ? c.wbsCode + ' – ' : '') + (c.wbsName ?? ''),
+                wbsLabel: c.wbsName ?? '',
                 displayStart: fmtDate(c.plannedStart),
                 displayEnd:   fmtDate(c.plannedEnd),
                 hasDate: !!(c.plannedStart || c.plannedEnd)

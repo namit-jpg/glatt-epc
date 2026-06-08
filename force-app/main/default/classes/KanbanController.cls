@@ -3,7 +3,7 @@ public with sharing class KanbanController {
     @AuraEnabled(cacheable=true)
     public static List<KanbanCard> getWorkPackages(Id projectId) {
         List<Work_Package__c> wps = [
-            SELECT Id, Name, Status__c, Planned_Start__c, Planned_End__c,
+            SELECT Id, Name, WP_Code__c, Status__c, Planned_Start__c, Planned_End__c,
                    Assigned_To__c, Assigned_To__r.Name,
                    WBS_Item__c, WBS_Item__r.Name, WBS_Item__r.WBS_Code__c
             FROM Work_Package__c
@@ -15,7 +15,7 @@ public with sharing class KanbanController {
         for (Work_Package__c wp : wps) {
             KanbanCard c = new KanbanCard();
             c.id           = wp.Id;
-            c.name         = wp.Name;
+            c.name         = wp.WP_Code__c != null ? wp.WP_Code__c : wp.Name;
             c.status       = wp.Status__c;
             c.plannedStart = wp.Planned_Start__c;
             c.plannedEnd   = wp.Planned_End__c;
