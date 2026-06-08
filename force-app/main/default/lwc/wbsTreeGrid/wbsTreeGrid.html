@@ -36,9 +36,8 @@
                 <div class="wbs-table">
                     <!-- header -->
                     <div class="wbs-header">
-                        <div class="wbs-th wbs-col-name">WBS Code &amp; Name</div>
+                        <div class="wbs-th wbs-col-name" style="text-align:left">WBS Code &amp; Name</div>
                         <div class="wbs-th wbs-col-dep">Predecessor/Successor</div>
-                        <div class="wbs-th wbs-col-lag num">Lag (d)</div>
                         <div class="wbs-th wbs-col-pred">Predecessor</div>
                         <div class="wbs-th wbs-col-dur num">Duration</div>
                         <div class="wbs-th wbs-col-budget num">Budget</div>
@@ -81,9 +80,6 @@
                             <!-- dependency type -->
                             <div class="wbs-td wbs-col-dep">{row.depTypeFull}</div>
 
-                            <!-- lag -->
-                            <div class="wbs-td wbs-col-lag num">{row.lagDisplay}</div>
-
                             <!-- predecessor code -->
                             <div class="wbs-td wbs-col-pred">{row.predecessorCode}</div>
 
@@ -125,6 +121,17 @@
                                     variant="border-filled"
                                     class="action-btn"
                                     onclick={handleAddChild}
+                                    data-id={row.id}
+                                    data-label={row.name}>
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:people"
+                                    title="Manage Resources"
+                                    alternative-text="Manage Resources"
+                                    size="xx-small"
+                                    variant="border-filled"
+                                    class="action-btn"
+                                    onclick={handleManageResources}
                                     data-id={row.id}
                                     data-label={row.name}>
                                 </lightning-button-icon>
@@ -327,6 +334,122 @@
                         onclick={handleProgressSave}
                         disabled={isSavingProgress}>
                     </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Manage Resources Modal -->
+    <template lwc:if={showResourceModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeResourceModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">Manage Resources</h2>
+                    <p class="slds-m-top_xx-small" style="color:rgba(255,255,255,.75);font-size:.8125rem;">{resourceWbsItemName}</p>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium">
+
+                    <template lwc:if={isLoadingAllocations}>
+                        <div class="slds-align_absolute-center slds-p-around_medium">
+                            <lightning-spinner alternative-text="Loading allocations" size="small"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasAllocations}>
+                        <ul class="slds-has-dividers_bottom-space">
+                            <template for:each={resourceAllocations} for:item="alloc">
+                                <li key={alloc.id} class="slds-item slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-vertical_xx-small">
+                                    <div class="slds-truncate">
+                                        <span class="slds-text-body_regular slds-text-title_bold">{alloc.resourceName}</span>
+                                        <template lwc:if={alloc.role}>
+                                            <span class="slds-text-body_small slds-text-color_weak slds-m-left_x-small">{alloc.role}</span>
+                                        </template>
+                                        <div class="slds-text-body_small slds-text-color_weak">
+                                            <span>{alloc.pctLabel}</span>
+                                            <template lwc:if={alloc.rangeLabel}>
+                                                <span class="slds-m-left_small">{alloc.rangeLabel}</span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <lightning-button-icon
+                                        icon-name="utility:delete"
+                                        title="Remove"
+                                        alternative-text="Remove"
+                                        size="x-small"
+                                        variant="border-filled"
+                                        onclick={handleAllocDelete}
+                                        data-id={alloc.id}
+                                        data-label={alloc.resourceName}>
+                                    </lightning-button-icon>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+
+                    <template lwc:if={isAllocationsEmpty}>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-p-vertical_x-small">
+                            No resources allocated to this item yet.
+                        </p>
+                    </template>
+
+                    <!-- Add allocation -->
+                    <template lwc:if={showAllocForm}>
+                        <div class="slds-box slds-box_x-small slds-m-top_small">
+                            <lightning-record-edit-form
+                                object-api-name="Resource_Allocation__c"
+                                onsubmit={handleAllocSubmit}
+                                onsuccess={handleAllocSaveSuccess}
+                                onerror={handleAllocSaveError}>
+                                <lightning-messages></lightning-messages>
+                                <div class="slds-grid slds-wrap slds-gutters_small">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Resource__c" required></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Role__c"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Allocation_Percent__c" required></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2"></div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Start_Date__c" required></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="End_Date__c" required></lightning-input-field>
+                                    </div>
+                                </div>
+                                <div class="slds-m-top_small slds-text-align_right">
+                                    <lightning-button type="submit" label="Add" variant="brand"></lightning-button>
+                                </div>
+                            </lightning-record-edit-form>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="slds-m-top_small">
+                            <lightning-button
+                                label="Allocate Resource"
+                                icon-name="utility:add"
+                                variant="neutral"
+                                onclick={handleShowAllocForm}>
+                            </lightning-button>
+                        </div>
+                    </template>
+
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={closeResourceModal}></lightning-button>
                 </footer>
             </div>
         </section>

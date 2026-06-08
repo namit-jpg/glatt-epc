@@ -1,6 +1,8 @@
 .gantt-container {
     overflow-x: auto;
+    overflow-y: hidden;
     min-height: 200px;
+    will-change: scroll-position;
 }
 
 .gantt-container svg {

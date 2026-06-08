@@ -19,6 +19,8 @@ export default class GanttChart extends LightningElement {
     _criticalIds = new Set();
     _libLoaded = false;
     _dataLoaded = false;
+    _wheelHandler = null;
+    _ganttEl = null;
 
     get dayVariant()   { return this.viewMode === 'Day'   ? 'brand' : 'neutral'; }
     get weekVariant()  { return this.viewMode === 'Week'  ? 'brand' : 'neutral'; }
@@ -113,6 +115,7 @@ export default class GanttChart extends LightningElement {
             });
             this.markCriticalArrows();
             this.applyHighlightClass();
+            this._attachWheelScroll();
         } catch (e) {
             this.hasError = true;
             this.errorMessage = 'Gantt render failed: ' + (e.message || e);
@@ -150,5 +153,28 @@ export default class GanttChart extends LightningElement {
     handleToggleCritical() {
         this.highlightCritical = !this.highlightCritical;
         this.applyHighlightClass();
+    }
+
+    _attachWheelScroll() {
+        const el = this.refs.ganttContainer;
+        if (!el) return;
+        this._ganttEl = el;
+        if (this._wheelHandler) el.removeEventListener('wheel', this._wheelHandler);
+        this._wheelHandler = (evt) => {
+            if (el.scrollWidth <= el.clientWidth) return;
+            evt.preventDefault();
+            // deltaMode: 0=px, 1=lines, 2=pages
+            const delta = evt.deltaMode === 1 ? evt.deltaY * 30
+                        : evt.deltaMode === 2 ? evt.deltaY * 300
+                        : evt.deltaY;
+            el.scrollLeft += delta;
+        };
+        el.addEventListener('wheel', this._wheelHandler, { passive: false, capture: true });
+    }
+
+    disconnectedCallback() {
+        if (this._ganttEl && this._wheelHandler) {
+            this._ganttEl.removeEventListener('wheel', this._wheelHandler, { capture: true });
+        }
     }
 }

@@ -141,6 +141,30 @@ public with sharing class ResourceAllocationController {
     }
 
     /**
+     * Returns the allocations tied to a single WBS item, for inline management
+     * from the WBS tab. Not cacheable so the list can be re-fetched imperatively
+     * after add/delete.
+     *
+     * @param wbsItemId The WBS_Item__c record Id
+     * @return Allocation rows for that WBS item
+     */
+    @AuraEnabled
+    public static List<AllocationRow> getAllocationsForWBSItem(Id wbsItemId) {
+        List<AllocationRow> rows = new List<AllocationRow>();
+        for (Resource_Allocation__c alloc : [
+            SELECT Id, Name, Resource__c, Resource__r.Name, Role__c,
+                   Allocation_Percent__c, Start_Date__c, End_Date__c,
+                   WBS_Item__c, WBS_Item__r.Name, WBS_Item__r.WBS_Code__c
+            FROM Resource_Allocation__c
+            WHERE WBS_Item__c = :wbsItemId
+            ORDER BY Resource__r.Name ASC, Start_Date__c ASC NULLS LAST
+        ]) {
+            rows.add(new AllocationRow(alloc));
+        }
+        return rows;
+    }
+
+    /**
      * Deletes a single resource allocation.
      *
      * @param allocationId The Resource_Allocation__c record Id

@@ -5,6 +5,8 @@ import getWBSTree from '@salesforce/apex/WBSTreeController.getWBSTree';
 import deleteWBSItem from '@salesforce/apex/WBSTreeController.deleteWBSItem';
 import runCPM from '@salesforce/apex/WBSTreeController.runCPM';
 import saveProgress from '@salesforce/apex/WBSTreeController.saveProgress';
+import getAllocationsForWBSItem from '@salesforce/apex/ResourceAllocationController.getAllocationsForWBSItem';
+import deleteAllocation from '@salesforce/apex/ResourceAllocationController.deleteAllocation';
 
 const DEP_LABELS = {
     FS: 'Finish-to-Start (FS)',
@@ -41,6 +43,14 @@ export default class WbsTreeGrid extends LightningElement {
     @track sliderDisplay = 0;
     @track _progressNotes = '';
     @track isSavingProgress = false;
+
+    // Resource allocation modal state
+    @track showResourceModal = false;
+    @track resourceWbsItemId;
+    @track resourceWbsItemName;
+    @track resourceAllocations = [];
+    @track isLoadingAllocations = false;
+    @track showAllocForm = false;
 
     _wiredResult;
     _expandedIds = new Set();
@@ -277,6 +287,77 @@ export default class WbsTreeGrid extends LightningElement {
         this.showProgressModal = false;
         this.progressRecordId  = undefined;
         this.progressItemName  = undefined;
+    }
+
+    // ── Resource allocation modal ────────────────────────────────────────
+
+    handleManageResources(event) {
+        this.resourceWbsItemId   = event.currentTarget.dataset.id;
+        this.resourceWbsItemName = event.currentTarget.dataset.label;
+        this.showAllocForm       = false;
+        this.showResourceModal   = true;
+        this.loadAllocations();
+    }
+
+    async loadAllocations() {
+        this.isLoadingAllocations = true;
+        try {
+            const rows = await getAllocationsForWBSItem({ wbsItemId: this.resourceWbsItemId });
+            this.resourceAllocations = rows.map(a => ({
+                ...a,
+                pctLabel:   a.allocationPercent != null ? `${a.allocationPercent}%` : '',
+                rangeLabel: [fmtDate(a.startDate), fmtDate(a.endDate)].filter(Boolean).join(' → ')
+            }));
+        } catch (e) {
+            this.toast('Error', e.body?.message ?? 'Failed to load allocations', 'error');
+        } finally {
+            this.isLoadingAllocations = false;
+        }
+    }
+
+    get hasAllocations()      { return this.resourceAllocations.length > 0; }
+    get isAllocationsEmpty()  { return !this.isLoadingAllocations && this.resourceAllocations.length === 0; }
+
+    handleShowAllocForm() {
+        this.showAllocForm = true;
+    }
+
+    handleAllocSubmit(event) {
+        event.preventDefault();
+        const fields = { ...event.detail.fields };
+        fields.Project__c  = this.recordId;
+        fields.WBS_Item__c = this.resourceWbsItemId;
+        this.template.querySelector('lightning-record-edit-form').submit(fields);
+    }
+
+    async handleAllocSaveSuccess() {
+        this.showAllocForm = false;
+        this.toast('Saved', 'Resource allocated', 'success');
+        await this.loadAllocations();
+    }
+
+    handleAllocSaveError(event) {
+        this.toast('Save Error', event.detail?.message ?? 'Save failed', 'error');
+    }
+
+    async handleAllocDelete(event) {
+        const id    = event.currentTarget.dataset.id;
+        const label = event.currentTarget.dataset.label;
+        try {
+            await deleteAllocation({ allocationId: id });
+            this.toast('Deleted', `Allocation for "${label}" removed`, 'success');
+            await this.loadAllocations();
+        } catch (e) {
+            this.toast('Error', e.body?.message ?? 'Delete failed', 'error');
+        }
+    }
+
+    closeResourceModal() {
+        this.showResourceModal   = false;
+        this.resourceWbsItemId   = undefined;
+        this.resourceWbsItemName = undefined;
+        this.resourceAllocations = [];
+        this.showAllocForm       = false;
     }
 
     toast(title, message, variant) {
