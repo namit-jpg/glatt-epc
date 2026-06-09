@@ -566,10 +566,7 @@
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <flexiPageRegions>
-        <name>sidebar</name>
-        <type>Region</type>
-    </flexiPageRegions>
+
     <description></description>
     <masterLabel>Project_Record_Page</masterLabel>
     <sobjectType>Project__c</sobjectType>

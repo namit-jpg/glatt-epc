@@ -80,7 +80,7 @@ public with sharing class DailyProgressController {
 
         public WpCard(Work_Package__c wp) {
             this.id          = wp.Id;
-            this.name        = wp.WP_Code__c != null ? wp.WP_Code__c : wp.Name;
+            this.name        = DailyProgressController.buildWpDisplayName(wp);
             this.status      = wp.Status__c;
             this.plannedStart = wp.Planned_Start__c;
             this.plannedEnd  = wp.Planned_End__c;
@@ -109,5 +109,12 @@ public with sharing class DailyProgressController {
             this.notes              = dp.Notes__c;
             this.loggedBy           = dp.Logged_By__r?.Name;
         }
+    }
+
+    private static String buildWpDisplayName(Work_Package__c wp) {
+        if (wp.WBS_Item__r.WBS_Code__c != null) {
+            return wp.WBS_Item__r.WBS_Code__c;
+        }
+        return wp.Name;
     }
 }
