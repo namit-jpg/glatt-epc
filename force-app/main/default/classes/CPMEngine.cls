@@ -66,7 +66,9 @@ public with sharing class CPMEngine {
         // Successor map
         Map<Id, List<Id>> succs = new Map<Id, List<Id>>();
         for (WBS_Item__c item : items) {
-            if (!succs.containsKey(item.Id)) succs.put(item.Id, new List<Id>());
+            succs.put(item.Id, new List<Id>());
+        }
+        for (WBS_Item__c item : items) {
             if (item.Predecessor__c != null && itemMap.containsKey(item.Predecessor__c)) {
                 succs.get(item.Predecessor__c).add(item.Id);
             }
