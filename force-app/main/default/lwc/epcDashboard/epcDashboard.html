@@ -1,283 +1,311 @@
 <template>
-    <div class="dashboard-wrap">
+    <div class="dash-root">
 
-        <!-- Header -->
-        <div class="dash-header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-            <div>
-                <h1 class="slds-text-heading_medium">EPC Management Dashboard</h1>
-                <p class="slds-text-body_small slds-text-color_weak">
-                    Live project portfolio · Critical path · Field reports
-                </p>
+        <!-- ── Header ──────────────────────────────────────────── -->
+        <div class="dash-header">
+            <div class="dash-header-inner">
+                <div class="dash-header-left">
+                    <div class="dash-header-icon">
+                        <lightning-icon icon-name="standard:dashboard" size="small"></lightning-icon>
+                    </div>
+                    <div>
+                        <h1 class="dash-title">EPC Management Dashboard</h1>
+                        <p class="dash-subtitle">Live project portfolio · Critical path · Field reports</p>
+                    </div>
+                </div>
+                <lightning-button-icon icon-name="utility:refresh" variant="bare-inverse"
+                    alternative-text="Refresh" title="Refresh" onclick={handleRefresh}
+                    disabled={isRefreshing}>
+                </lightning-button-icon>
             </div>
-            <lightning-button-icon
-                icon-name="utility:refresh"
-                variant="border"
-                alternative-text="Refresh"
-                title="Refresh dashboard"
-                onclick={handleRefresh}
-                disabled={isRefreshing}>
-            </lightning-button-icon>
         </div>
 
-        <!-- Loading spinner -->
+        <!-- ── Loading / Error ─────────────────────────────────── -->
         <template lwc:if={isLoading}>
             <div class="slds-align_absolute-center slds-p-around_large">
                 <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
             </div>
         </template>
-
-        <!-- Error -->
         <template lwc:if={hasError}>
-            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_medium" role="alert">
-                <span class="slds-assistive-text">Error</span>
-                <lightning-icon icon-name="utility:error" alternative-text="Error" size="x-small"
-                    class="slds-m-right_x-small"></lightning-icon>
+            <div class="dash-error slds-m-around_medium" role="alert">
+                <lightning-icon icon-name="utility:error" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                 {errorMessage}
             </div>
         </template>
 
-        <!-- Dashboard body -->
+        <!-- ── Body ────────────────────────────────────────────── -->
         <template lwc:if={hasData}>
+        <div class="dash-body">
 
-            <!-- ── KPI Row ─────────────────────────────────────────── -->
-            <div class="kpi-row slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-4">
-                    <div class="kpi-card">
-                        <span class="kpi-value">{projectCount}</span>
+            <!-- KPI row -->
+            <div class="kpi-grid">
+
+                <div class="kpi-card kpi-card_indigo">
+                    <div class="kpi-icon">
+                        <lightning-icon icon-name="utility:office" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="kpi-meta">
                         <span class="kpi-label">Active Projects</span>
+                        <div class="kpi-num">{projectCount}</div>
+                        <span class="kpi-foot">Live portfolio</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-4">
-                    <div class="kpi-card kpi-card_blue">
-                        <span class="kpi-value">{totalBudgetLabel}</span>
-                        <span class="kpi-label">Total Portfolio Budget</span>
+
+                <div class="kpi-card kpi-card_blue">
+                    <div class="kpi-icon">
+                        <lightning-icon icon-name="utility:currency" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Portfolio Budget</span>
+                        <div class="kpi-num">{totalBudgetLabel}</div>
+                        <span class="kpi-foot">{totalSpentLabel} committed</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-4">
-                    <div class="kpi-card kpi-card_green">
-                        <span class="kpi-value">{avgProgressLabel}</span>
+
+                <div class="kpi-card kpi-card_green">
+                    <div class="kpi-icon">
+                        <lightning-icon icon-name="utility:trending" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="kpi-meta">
                         <span class="kpi-label">Average Progress</span>
+                        <div class="kpi-num">{avgProgressLabel}</div>
                         <div class="kpi-bar-track">
                             <div class="kpi-bar-fill" style={avgProgressBarStyle}></div>
                         </div>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-4">
-                    <div class="kpi-card kpi-card_red">
-                        <span class="kpi-value">{criticalItemCount}</span>
+
+                <div class="kpi-card kpi-card_red">
+                    <div class="kpi-icon">
+                        <lightning-icon icon-name="utility:warning" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="kpi-meta">
                         <span class="kpi-label">Critical Path Items</span>
-                        <span class="kpi-sub">{atRiskCount} near-critical</span>
+                        <div class="kpi-num">{criticalItemCount}</div>
+                        <span class="kpi-foot">{atRiskCount} near-critical</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- ── Portfolio + BU Breakdown ───────────────────────── -->
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+            </div><!-- /kpi-grid -->
 
-                <!-- Portfolio table -->
-                <div class="slds-col slds-size_7-of-12">
-                    <div class="slds-card panel-card">
-                        <div class="slds-card__header slds-grid slds-grid_align-spread">
-                            <h2 class="slds-card__header-title slds-text-heading_small">
-                                Project Portfolio
-                            </h2>
+            <!-- Main two-column area -->
+            <div class="main-grid">
+
+                <!-- Left: portfolio table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <lightning-icon icon-name="utility:list" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        <span>Project Portfolio</span>
+                    </div>
+                    <div class="panel-body">
+                        <table class="ptable">
+                            <thead>
+                                <tr>
+                                    <th style="width:32%">Project</th>
+                                    <th style="width:11%">BU</th>
+                                    <th style="width:12%">Status</th>
+                                    <th style="width:24%">Progress</th>
+                                    <th style="width:11%">Budget</th>
+                                    <th style="width:10%">End</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={portfolio} for:item="proj">
+                                    <tr key={proj.id} class={proj.rowAccentClass}>
+                                        <td>
+                                            <div class="ptable-name" title={proj.name}>{proj.name}</div>
+                                            <div class="ptable-sub">{proj.nature} · {proj.location}</div>
+                                        </td>
+                                        <td><span class={proj.buClass}>{proj.businessUnit}</span></td>
+                                        <td><span class={proj.statusClass}>{proj.status}</span></td>
+                                        <td>
+                                            <div class="prog-wrap">
+                                                <div class="prog-track">
+                                                    <div class={proj.progressFillClass} style={proj.progressStyle}></div>
+                                                </div>
+                                                <span class="prog-pct">{proj.progressLabel}</span>
+                                            </div>
+                                        </td>
+                                        <td class="ptable-num">{proj.budgetLabel}</td>
+                                        <td class="ptable-num">{proj.endDateLabel}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right column -->
+                <div class="right-col">
+
+                    <!-- Status distribution -->
+                    <div class="panel panel_compact">
+                        <div class="panel-header">
+                            <lightning-icon icon-name="utility:pie_chart" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>Project Status</span>
                         </div>
-                        <div class="slds-card__body slds-card__body_inner">
-                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout portfolio-table">
+                        <div class="panel-body">
+                            <div class="donut-row">
+                                <div class="donut-container">
+                                    <svg viewBox="0 0 42 42" class="donut-svg">
+                                        <circle cx="21" cy="21" r="15.9155" fill="transparent"
+                                                stroke="#e8e8e8" stroke-width="5"/>
+                                        <template for:each={donutSegments} for:item="seg">
+                                            <circle key={seg.id}
+                                                    cx="21" cy="21" r="15.9155"
+                                                    fill="transparent"
+                                                    stroke={seg.color}
+                                                    stroke-width="5"
+                                                    stroke-dasharray={seg.dasharray}
+                                                    stroke-dashoffset={seg.dashoffset}>
+                                            </circle>
+                                        </template>
+                                    </svg>
+                                    <div class="donut-center">
+                                        <span class="donut-center-num">{projectCount}</span>
+                                        <span class="donut-center-lbl">Total</span>
+                                    </div>
+                                </div>
+                                <div class="donut-legend">
+                                    <template for:each={donutSegments} for:item="seg">
+                                        <div key={seg.id} class="legend-row">
+                                            <span class="legend-dot" style={seg.dotStyle}></span>
+                                            <span class="legend-label">{seg.label}</span>
+                                            <span class="legend-count">{seg.count}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BU breakdown -->
+                    <div class="panel panel_compact">
+                        <div class="panel-header">
+                            <lightning-icon icon-name="utility:company" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>By Business Unit</span>
+                        </div>
+                        <div class="panel-body">
+                            <template for:each={buBreakdown} for:item="bu">
+                                <div key={bu.businessUnit} class="bu-row">
+                                    <div class="bu-row-head">
+                                        <span class={bu.buClass}>{bu.businessUnit}</span>
+                                        <span class="bu-row-meta">{bu.projectCount} project{bu.pluralSuffix} · {bu.budgetLabel}</span>
+                                    </div>
+                                    <div class="prog-track prog-track_sm">
+                                        <div class="prog-fill-green" style={bu.progressStyle}></div>
+                                    </div>
+                                    <div class="bu-row-foot">{bu.progressLabel} avg progress</div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Budget vs spend -->
+                    <div class="panel panel_compact">
+                        <div class="panel-header">
+                            <lightning-icon icon-name="utility:currency" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>Budget vs Spend</span>
+                        </div>
+                        <div class="panel-body">
+                            <template for:each={portfolio} for:item="proj">
+                                <div key={proj.id} class="spend-row">
+                                    <div class="spend-row-head">
+                                        <span class="spend-name">{proj.name}</span>
+                                        <span class="spend-nums">{proj.spentLabel} / {proj.budgetLabel}</span>
+                                    </div>
+                                    <div class="prog-track prog-track_sm">
+                                        <div class="prog-fill-orange" style={proj.spentStyle}></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div><!-- /right-col -->
+
+            </div><!-- /main-grid -->
+
+            <!-- Bottom row: critical path + field reports -->
+            <div class="bottom-grid">
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <lightning-icon icon-name="utility:routing_offline" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        <span>Critical Path Items</span>
+                    </div>
+                    <div class="panel-body">
+                        <template lwc:if={hasCriticalItems}>
+                            <table class="ptable">
                                 <thead>
-                                    <tr class="slds-line-height_reset">
-                                        <th scope="col" style="width:30%">Project</th>
-                                        <th scope="col" style="width:12%">BU</th>
-                                        <th scope="col" style="width:12%">Status</th>
-                                        <th scope="col" style="width:22%">Progress</th>
-                                        <th scope="col" style="width:12%">Budget</th>
-                                        <th scope="col" style="width:12%">End Date</th>
+                                    <tr>
+                                        <th style="width:13%">Code</th>
+                                        <th style="width:37%">Activity</th>
+                                        <th style="width:25%">Project</th>
+                                        <th style="width:13%">Float</th>
+                                        <th style="width:12%">Finish</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template for:each={portfolio} for:item="proj">
-                                        <tr key={proj.id}>
-                                            <td>
-                                                <div class="slds-truncate" title={proj.name}>
-                                                    <strong>{proj.name}</strong>
-                                                </div>
-                                                <div class="slds-text-body_small slds-text-color_weak">{proj.nature} · {proj.location}</div>
-                                            </td>
-                                            <td>
-                                                <span class={proj.buClass}>{proj.businessUnit}</span>
-                                            </td>
-                                            <td>
-                                                <span class={proj.statusClass}>{proj.status}</span>
-                                            </td>
-                                            <td>
-                                                <div class="progress-wrap">
-                                                    <div class="progress-track">
-                                                        <div class="progress-fill" style={proj.progressStyle}></div>
-                                                    </div>
-                                                    <span class="progress-pct">{proj.progressLabel}</span>
-                                                </div>
-                                            </td>
-                                            <td class="slds-text-body_small">{proj.budgetLabel}</td>
-                                            <td class="slds-text-body_small">{proj.endDateLabel}</td>
+                                    <template for:each={criticalItems} for:item="item">
+                                        <tr key={item.id}>
+                                            <td><code>{item.wbsCode}</code></td>
+                                            <td><div class="ptable-name" title={item.name}>{item.name}</div></td>
+                                            <td class="ptable-sub">{item.projectName}</td>
+                                            <td><span class={item.riskClass}>{item.riskLabel}</span></td>
+                                            <td class="ptable-num">{item.endDateLabel}</td>
                                         </tr>
                                     </template>
                                 </tbody>
                             </table>
-                        </div>
+                        </template>
+                        <template lwc:else>
+                            <p class="panel-empty">No critical path items — run CPM on a project to generate.</p>
+                        </template>
                     </div>
                 </div>
 
-                <!-- BU Breakdown -->
-                <div class="slds-col slds-size_5-of-12">
-                    <div class="slds-card panel-card">
-                        <div class="slds-card__header">
-                            <h2 class="slds-card__header-title slds-text-heading_small">By Business Unit</h2>
-                        </div>
-                        <div class="slds-card__body slds-card__body_inner">
-                            <template for:each={buBreakdown} for:item="bu">
-                                <div key={bu.businessUnit} class="bu-card">
-                                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_xx-small">
-                                        <div>
-                                            <span class={bu.buClass}>{bu.businessUnit}</span>
-                                            <span class="slds-m-left_x-small slds-text-body_small slds-text-color_weak">
-                                                {bu.projectCount} project{bu.pluralSuffix}
-                                            </span>
+                <div class="panel">
+                    <div class="panel-header">
+                        <lightning-icon icon-name="utility:today" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        <span>Recent Field Reports</span>
+                    </div>
+                    <div class="panel-body">
+                        <template lwc:if={hasLogs}>
+                            <ul class="log-list">
+                                <template for:each={recentLogs} for:item="log">
+                                    <li key={log.id} class="log-item">
+                                        <div class="log-row-head">
+                                            <div class="log-left">
+                                                <span class="log-wp">{log.wpName}</span>
+                                                <span class="log-proj">· {log.projectName}</span>
+                                            </div>
+                                            <div class="log-right">
+                                                <span class="log-pct">{log.percentLabel}%</span>
+                                                <span class="log-weather">{log.weatherIcon}</span>
+                                            </div>
                                         </div>
-                                        <span class="slds-text-body_small slds-text-color_weak">{bu.budgetLabel}</span>
-                                    </div>
-                                    <div class="progress-track">
-                                        <div class="progress-fill" style={bu.progressStyle}></div>
-                                    </div>
-                                    <div class="slds-text-body_small slds-m-top_xx-small">{bu.progressLabel} avg progress</div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Spend Summary -->
-                    <div class="slds-card panel-card slds-m-top_small">
-                        <div class="slds-card__header">
-                            <h2 class="slds-card__header-title slds-text-heading_small">Budget vs Spend</h2>
-                        </div>
-                        <div class="slds-card__body slds-card__body_inner">
-                            <template for:each={portfolio} for:item="proj">
-                                <div key={proj.id} class="spend-row">
-                                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
-                                        <span class="slds-text-body_small slds-truncate" style="max-width:55%">{proj.name}</span>
-                                        <span class="slds-text-body_small">{proj.spentLabel} / {proj.budgetLabel}</span>
-                                    </div>
-                                    <div class="progress-track">
-                                        <div class="spend-fill" style={proj.spentStyle}></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── Critical Path + Recent Logs ────────────────────── -->
-            <div class="slds-grid slds-gutters">
-
-                <!-- Critical path items -->
-                <div class="slds-col slds-size_1-of-2">
-                    <div class="slds-card panel-card">
-                        <div class="slds-card__header">
-                            <h2 class="slds-card__header-title slds-text-heading_small">
-                                Critical Path Items
-                            </h2>
-                        </div>
-                        <div class="slds-card__body slds-card__body_inner">
-                            <template lwc:if={hasCriticalItems}>
-                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout crit-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:15%">Code</th>
-                                            <th style="width:35%">Activity</th>
-                                            <th style="width:25%">Project</th>
-                                            <th style="width:12%">Float</th>
-                                            <th style="width:13%">Finish</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template for:each={criticalItems} for:item="item">
-                                            <tr key={item.id}>
-                                                <td class="slds-text-body_small">
-                                                    <code>{item.wbsCode}</code>
-                                                </td>
-                                                <td>
-                                                    <div class="slds-truncate slds-text-body_small" title={item.name}>
-                                                        {item.name}
-                                                    </div>
-                                                </td>
-                                                <td class="slds-text-body_small slds-truncate">{item.projectName}</td>
-                                                <td>
-                                                    <span class={item.riskClass}>{item.riskLabel}</span>
-                                                </td>
-                                                <td class="slds-text-body_small">{item.endDateLabel}</td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </template>
-                            <template lwc:else>
-                                <p class="slds-text-color_weak slds-text-align_center slds-p-around_medium">
-                                    No critical path items. Run CPM on a project to generate.
-                                </p>
-                            </template>
-                        </div>
+                                        <div class="log-notes">{log.notesSnippet}</div>
+                                        <div class="log-meta">{log.dateLabel} · {log.loggedBy}</div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template lwc:else>
+                            <p class="panel-empty">No field reports logged yet.</p>
+                        </template>
                     </div>
                 </div>
 
-                <!-- Recent field reports -->
-                <div class="slds-col slds-size_1-of-2">
-                    <div class="slds-card panel-card">
-                        <div class="slds-card__header">
-                            <h2 class="slds-card__header-title slds-text-heading_small">
-                                Recent Field Reports
-                            </h2>
-                        </div>
-                        <div class="slds-card__body slds-card__body_inner">
-                            <template lwc:if={hasLogs}>
-                                <ul class="slds-has-dividers_top-space log-list">
-                                    <template for:each={recentLogs} for:item="log">
-                                        <li key={log.id} class="slds-item log-item">
-                                            <div class="slds-grid slds-grid_align-spread log-header">
-                                                <div>
-                                                    <span class="log-wp">{log.wpName}</span>
-                                                    <span class="slds-text-body_small slds-text-color_weak slds-m-left_x-small">
-                                                        · {log.projectName}
-                                                    </span>
-                                                </div>
-                                                <div class="slds-shrink-none">
-                                                    <span class="log-pct">{log.percentLabel}%</span>
-                                                    <span class="log-weather">{log.weatherIcon}</span>
-                                                </div>
-                                            </div>
-                                            <div class="log-notes slds-text-body_small">{log.notesSnippet}</div>
-                                            <div class="slds-text-body_small slds-text-color_weak log-meta">
-                                                {log.dateLabel} · {log.loggedBy}
-                                            </div>
-                                        </li>
-                                    </template>
-                                </ul>
-                            </template>
-                            <template lwc:else>
-                                <p class="slds-text-color_weak slds-text-align_center slds-p-around_medium">
-                                    No field reports logged yet.
-                                </p>
-                            </template>
-                        </div>
-                    </div>
-                </div>
+            </div><!-- /bottom-grid -->
 
-            </div>
+        </div><!-- /dash-body -->
         </template>
 
         <!-- Empty state -->
         <template lwc:if={isEmpty}>
             <div class="slds-illustration slds-illustration_small slds-p-around_large">
-                <div class="slds-text-longform slds-text-align_center">
+                <div class="slds-text-align_center">
                     <h3 class="slds-text-heading_medium">No project data yet</h3>
                     <p class="slds-text-body_regular">Create a project and run CPM to populate this dashboard.</p>
                 </div>

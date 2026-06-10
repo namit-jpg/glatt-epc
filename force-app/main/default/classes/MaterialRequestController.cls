@@ -147,22 +147,48 @@ public with sharing class MaterialRequestController {
     public static Id approveRequest(Id requestId) {
         try {
             Material_Request__c req = [
-                SELECT Id, Status__c, WBS_Item__c, WBS_Item__r.Project__c, Name, Material_Name__c, Quantity__c, Unit__c
+                SELECT Id, Status__c, Name, Material_Name__c, Quantity__c, Unit__c,
+                       Required_Date__c, Notes__c,
+                       WBS_Item__c, WBS_Item__r.Name, WBS_Item__r.WBS_Code__c,
+                       WBS_Item__r.Project__c, WBS_Item__r.Project__r.Name,
+                       CreatedBy.Name
                 FROM Material_Request__c WHERE Id = :requestId LIMIT 1
             ];
             if (req.Status__c != 'Submitted') {
                 throw new AuraHandledException('Only Submitted requests can be approved.');
             }
-            req.Status__c    = 'Approved';
+            req.Status__c      = 'Approved';
             req.Approved_By__c = UserInfo.getUserId();
             update req;
 
+            String wbsLabel = (req.WBS_Item__r.WBS_Code__c != null
+                ? req.WBS_Item__r.WBS_Code__c + ' — ' : '') + req.WBS_Item__r.Name;
+            String qtyStr   = req.Quantity__c != null
+                ? String.valueOf(req.Quantity__c.stripTrailingZeros().toPlainString())
+                  + ' ' + (req.Unit__c ?? '') : '—';
+            String reqDate  = req.Required_Date__c != null
+                ? req.Required_Date__c.format() : '—';
+
+            String notes = 'Material: '    + (req.Material_Name__c ?? '—') + '\n'
+                         + 'Quantity: '    + qtyStr + '\n'
+                         + 'Required By: ' + reqDate + '\n'
+                         + 'WBS Item: '    + wbsLabel + '\n'
+                         + 'Project: '     + (req.WBS_Item__r.Project__r?.Name ?? '—') + '\n'
+                         + 'Requested By: '+ req.CreatedBy.Name + '\n'
+                         + 'Request #: '   + req.Name;
+            if (String.isNotBlank(req.Notes__c)) {
+                notes += '\n\nRequester Notes:\n' + req.Notes__c;
+            }
+
             RFQ__c rfq = new RFQ__c(
-                Material_Request__c = req.Id,
-                Project__c          = req.WBS_Item__r.Project__c,
-                Status__c           = 'Draft',
-                Notes__c            = 'Auto-generated from ' + req.Name + ': ' + req.Material_Name__c
-                                      + (req.Quantity__c != null ? ' × ' + req.Quantity__c + ' ' + (req.Unit__c ?? '') : '')
+                Material_Request__c  = req.Id,
+                Project__c           = req.WBS_Item__r.Project__c,
+                WBS_Item__c          = req.WBS_Item__c,
+                Status__c            = 'Draft',
+                Expected_Delivery__c = req.Required_Date__c,
+                Submission_Date__c   = Date.today(),
+                Issued_By__c         = UserInfo.getUserId(),
+                Notes__c             = notes
             );
             insert rfq;
             return rfq.Id;

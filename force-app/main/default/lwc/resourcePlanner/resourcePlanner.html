@@ -23,7 +23,7 @@
                 </div>
             </template>
 
-            <!-- Per-resource load summary -->
+            <!-- Per-resource load summary cards -->
             <template lwc:if={hasResources}>
                 <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
                     <template for:each={resources} for:item="res">
@@ -55,6 +55,7 @@
                 </div>
             </template>
 
+            <!-- Allocations table -->
             <template lwc:if={hasData}>
                 <lightning-datatable
                     key-field="id"
@@ -63,8 +64,11 @@
                     hide-checkbox-column
                     onrowaction={handleRowAction}>
                 </lightning-datatable>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                    Looking for the cross-project schedule? See the
+                    <strong>Resource Timeline</strong> tab in the app navigation.
+                </p>
             </template>
-
             <template lwc:if={isEmpty}>
                 <div class="slds-illustration slds-illustration_small slds-align_absolute-center slds-p-around_large">
                     <div class="slds-text-align_center">
@@ -74,11 +78,7 @@
                             Allocate team members to this project to plan capacity
                         </p>
                         <div class="slds-m-top_medium">
-                            <lightning-button
-                                label="Add First Allocation"
-                                variant="brand"
-                                onclick={handleNew}>
-                            </lightning-button>
+                            <lightning-button label="Add First Allocation" variant="brand" onclick={handleNew}></lightning-button>
                         </div>
                     </div>
                 </div>

@@ -6,10 +6,17 @@ public with sharing class EPCDashboardController {
         @AuraEnabled public Decimal  avgProgress;
         @AuraEnabled public Integer  criticalItemCount;
         @AuraEnabled public Integer  atRiskCount;
-        @AuraEnabled public List<ProjectRow>  portfolio;
-        @AuraEnabled public List<BURow>       buBreakdown;
-        @AuraEnabled public List<CriticalRow> criticalItems;
-        @AuraEnabled public List<LogRow>      recentLogs;
+        @AuraEnabled public List<ProjectRow>   portfolio;
+        @AuraEnabled public List<BURow>        buBreakdown;
+        @AuraEnabled public List<CriticalRow>  criticalItems;
+        @AuraEnabled public List<LogRow>       recentLogs;
+        @AuraEnabled public List<StatusCount>  statusBreakdown;
+    }
+
+    public class StatusCount {
+        @AuraEnabled public String  status;
+        @AuraEnabled public Integer count;
+        @AuraEnabled public String  statusClass;
     }
 
     public class ProjectRow {
@@ -127,6 +134,22 @@ public with sharing class EPCDashboardController {
         data.portfolio    = portfolio;
         data.totalBudget  = totalBudget;
         data.avgProgress  = withProgress > 0 ? (totalProgress / withProgress).setScale(1) : 0;
+
+        // Status distribution
+        Map<String, Integer> statusMap = new Map<String, Integer>();
+        for (Project__c p : projects) {
+            String s = p.Status__c != null ? p.Status__c : 'Planning';
+            statusMap.put(s, (statusMap.containsKey(s) ? statusMap.get(s) : 0) + 1);
+        }
+        List<StatusCount> statusCounts = new List<StatusCount>();
+        for (String s : statusMap.keySet()) {
+            StatusCount sc = new StatusCount();
+            sc.status      = s;
+            sc.count       = statusMap.get(s);
+            sc.statusClass = statusClass(s);
+            statusCounts.add(sc);
+        }
+        data.statusBreakdown = statusCounts;
 
         List<BURow> buList = new List<BURow>();
         for (BURow br : buMap.values()) {

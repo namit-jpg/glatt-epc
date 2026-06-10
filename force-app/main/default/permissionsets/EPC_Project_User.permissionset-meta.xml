@@ -20,6 +20,10 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>Resource_Timeline</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>EPC_Dashboard</tab>
         <visibility>Visible</visibility>
     </tabSettings>
@@ -35,6 +39,10 @@
     <!-- Apex Class Access -->
     <classAccesses>
         <apexClass>WBSTreeController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>RFQLineItemController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -147,6 +155,17 @@
         <modifyAllRecords>true</modifyAllRecords>
         <object>WBS_Dependency__c</object>
         <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
+    <!-- RFQ_Line_Item__c Object -->
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>RFQ_Line_Item__c</object>
+        <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
 
     <!-- WBS_Dependency__c Field Permissions (Successor__c is master-detail — no FLS) -->
@@ -449,6 +468,43 @@
         <readable>true</readable>
     </fieldPermissions>
 
+    <!-- RFQ_Line_Item__c Field Permissions -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Product__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Material_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Quantity__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Unit__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Unit_Price__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>RFQ_Line_Item__c.Total_Price__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ_Line_Item__c.Notes__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
     <!-- RFQ__c Field Permissions -->
     <fieldPermissions>
         <editable>true</editable>
@@ -483,6 +539,46 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>RFQ__c.Estimated_Value__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Contact__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Submission_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Valid_Until__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Payment_Terms__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Delivery_Terms__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Scope_of_Supply__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.Issued_By__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>RFQ__c.WBS_Item__c</field>
         <readable>true</readable>
     </fieldPermissions>
 

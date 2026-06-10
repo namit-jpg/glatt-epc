@@ -1,0 +1,168 @@
+<template>
+    <div class="rt-root">
+
+        <!-- ── Header ─────────────────────────────────────────── -->
+        <div class="rt-topbar">
+            <div class="rt-topbar-left">
+                <div class="rt-topbar-icon">
+                    <lightning-icon icon-name="standard:today" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div>
+                    <h1 class="rt-title">Resource Timeline</h1>
+                    <p class="rt-subtitle">Who is working on what, and when — across every project</p>
+                </div>
+            </div>
+            <div class="rt-topbar-right">
+                <div class="rt-zoom-group">
+                    <button class={weekBtnClass} onclick={setZoomWeek}>Week</button>
+                    <button class={monthBtnClass} onclick={setZoomMonth}>Month</button>
+                    <button class={quarterBtnClass} onclick={setZoomQuarter}>Quarter</button>
+                </div>
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                    alternative-text="Refresh" title="Refresh" onclick={handleRefresh}
+                    class="rt-refresh">
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- ── Control / KPI strip ────────────────────────────── -->
+        <template lwc:if={showTimeline}>
+            <div class="rt-controls">
+                <div class="rt-filter">
+                    <lightning-combobox
+                        label="Project"
+                        variant="label-hidden"
+                        value={selectedProjectId}
+                        options={projectOptions}
+                        onchange={handleProjectChange}
+                        dropdown-alignment="left">
+                    </lightning-combobox>
+                </div>
+                <div class="rt-kpis">
+                    <div class="rt-kpi">
+                        <span class="rt-kpi-num">{kpi.resources}</span>
+                        <span class="rt-kpi-lbl">Resources</span>
+                    </div>
+                    <div class="rt-kpi">
+                        <span class={kpi.overClass}>{kpi.over}</span>
+                        <span class="rt-kpi-lbl">Over-allocated</span>
+                    </div>
+                    <div class="rt-kpi">
+                        <span class="rt-kpi-num">{kpi.projects}</span>
+                        <span class="rt-kpi-lbl">Projects</span>
+                    </div>
+                    <div class="rt-kpi rt-kpi_range">
+                        <span class="rt-kpi-range">{kpi.range}</span>
+                        <span class="rt-kpi-lbl">Window</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project legend -->
+            <div class="rt-legend">
+                <template for:each={legend} for:item="lg">
+                    <span key={lg.id} class="rt-legend-item">
+                        <span class="rt-legend-dot" style={lg.style}></span>{lg.name}
+                    </span>
+                </template>
+            </div>
+        </template>
+
+        <!-- ── States ─────────────────────────────────────────── -->
+        <template lwc:if={isLoading}>
+            <div class="slds-align_absolute-center slds-p-around_x-large">
+                <lightning-spinner alternative-text="Loading timeline" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        <template lwc:if={hasError}>
+            <div class="rt-error" role="alert">
+                <lightning-icon icon-name="utility:error" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                {errorMessage}
+            </div>
+        </template>
+        <template lwc:if={isEmpty}>
+            <div class="rt-empty">
+                <lightning-icon icon-name="standard:people" size="large"></lightning-icon>
+                <p class="rt-empty-title">No resource allocations to show</p>
+                <p class="rt-empty-sub">Allocate team members to projects to populate the timeline.</p>
+            </div>
+        </template>
+
+        <!-- ── Timeline grid ──────────────────────────────────── -->
+        <template lwc:if={showTimeline}>
+            <div class="rt-scroll">
+                <div class="rt-content" style={view.contentStyle}>
+
+                    <!-- Background layer: weekend shading + gridlines -->
+                    <div class="rt-bg" style={view.bgStyle}>
+                        <template for:each={view.weekendStripes} for:item="we">
+                            <div key={we.key} class="rt-weekend" style={we.style}></div>
+                        </template>
+                        <template for:each={view.gridLines} for:item="gl">
+                            <div key={gl.key} class="rt-grid" style={gl.style}></div>
+                        </template>
+                    </div>
+
+                    <!-- Today line overlay (above bars, below frozen names) -->
+                    <div class="rt-today" style={view.todayStyle}></div>
+
+                    <!-- Sticky two-tier header -->
+                    <div class="rt-header">
+                        <div class="rt-corner" style={view.nameColStyle}>
+                            <span class="rt-corner-lbl">Resource</span>
+                            <span class="rt-corner-sub">peak load</span>
+                        </div>
+                        <div class="rt-tiers" style={view.tierStyle}>
+                            <div class="rt-tier rt-tier-top">
+                                <template for:each={view.topCells} for:item="c">
+                                    <div key={c.key} class="rt-top-cell" style={c.style}>{c.label}</div>
+                                </template>
+                            </div>
+                            <div class="rt-tier rt-tier-bottom">
+                                <template for:each={view.bottomCells} for:item="c">
+                                    <div key={c.key} class="rt-bot-cell" style={c.style}>{c.label}</div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resource rows -->
+                    <div class="rt-rows">
+                        <template for:each={view.rows} for:item="row">
+                            <div key={row.resourceId} class={row.rowClass} style={row.rowStyle}>
+                                <div class={row.nameClass} style={view.nameColStyle}>
+                                    <div class="rt-name-main">
+                                        <span class="rt-res-name">{row.resourceName}</span>
+                                        <template lwc:if={row.role}>
+                                            <span class="rt-res-role">{row.role}</span>
+                                        </template>
+                                    </div>
+                                    <span class={row.peakClass}>{row.peakLabel}</span>
+                                </div>
+                                <div class="rt-track" style={row.trackStyle}>
+                                    <template for:each={row.bars} for:item="bar">
+                                        <div key={bar.id} class="rt-bar" style={bar.style} title={bar.title}>
+                                            <template lwc:if={bar.showLabel}>
+                                                <span class="rt-bar-lbl">{bar.label}</span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="rt-footnote">
+                <span class="rt-foot-item"><span class="rt-foot-today"></span>Today</span>
+                <span class="rt-foot-sep">·</span>
+                <span class="rt-foot-item"><span class="rt-foot-over"></span>Red row = peak load over 100%</span>
+                <span class="rt-foot-sep">·</span>
+                <span class="rt-foot-item">Bars stack when a person has overlapping assignments</span>
+            </div>
+        </template>
+
+    </div>
+</template>

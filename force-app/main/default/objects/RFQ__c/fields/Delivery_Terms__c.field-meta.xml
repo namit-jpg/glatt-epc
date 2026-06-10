@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Delivery_Terms__c</fullName>
+    <label>Delivery Terms (Incoterms)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>EXW</fullName><default>false</default><label>EXW — Ex Works</label></value>
+            <value><fullName>FCA</fullName><default>false</default><label>FCA — Free Carrier</label></value>
+            <value><fullName>FOB</fullName><default>false</default><label>FOB — Free On Board</label></value>
+            <value><fullName>CIF</fullName><default>false</default><label>CIF — Cost, Insurance &amp; Freight</label></value>
+            <value><fullName>DAP</fullName><default>false</default><label>DAP — Delivered at Place</label></value>
+            <value><fullName>DDP</fullName><default>false</default><label>DDP — Delivered Duty Paid</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

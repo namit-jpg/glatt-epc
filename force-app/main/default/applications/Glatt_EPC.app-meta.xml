@@ -8,6 +8,7 @@
     <navType>Standard</navType>
     <tabs>Project__c</tabs>
     <tabs>Resource_Dashboard</tabs>
+    <tabs>Resource_Timeline</tabs>
     <tabs>EPC_Dashboard</tabs>
     <tabs>Material_Requests</tabs>
     <tabs>RFQ__c</tabs>

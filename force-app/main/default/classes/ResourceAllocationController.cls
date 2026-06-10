@@ -141,6 +141,43 @@ public with sharing class ResourceAllocationController {
     }
 
     /**
+     * Returns every resource allocation across all projects (those with a
+     * resource and a start/end date) plus the distinct project list, for the
+     * org-wide Resource Timeline app page. The component groups the flat rows
+     * by resource and lays them out on a time axis client-side, so the Apex
+     * stays a thin data feed.
+     *
+     * @return TimelineData with flat allocation rows and project options
+     */
+    @AuraEnabled(cacheable=true)
+    public static TimelineData getResourceTimeline() {
+        List<Resource_Allocation__c> allocations = [
+            SELECT Id, Resource__c, Resource__r.Name, Role__c,
+                   Allocation_Percent__c, Start_Date__c, End_Date__c,
+                   Project__c, Project__r.Name,
+                   WBS_Item__c, WBS_Item__r.Name, WBS_Item__r.WBS_Code__c
+            FROM Resource_Allocation__c
+            WHERE Resource__c != null
+              AND Start_Date__c != null
+              AND End_Date__c != null
+            ORDER BY Resource__r.Name ASC, Start_Date__c ASC
+        ];
+
+        TimelineData data = new TimelineData();
+        Map<Id, String> projectNames = new Map<Id, String>();
+        for (Resource_Allocation__c alloc : allocations) {
+            data.allocations.add(new TimelineRow(alloc));
+            if (alloc.Project__c != null) {
+                projectNames.put(alloc.Project__c, alloc.Project__r.Name);
+            }
+        }
+        for (Id projId : projectNames.keySet()) {
+            data.projects.add(new ProjectOption(projId, projectNames.get(projId)));
+        }
+        return data;
+    }
+
+    /**
      * Returns the allocations tied to a single WBS item, for inline management
      * from the WBS tab. Not cacheable so the list can be re-fetched imperatively
      * after add/delete.
@@ -267,5 +304,48 @@ public with sharing class ResourceAllocationController {
     public class UtilizationCell {
         @AuraEnabled public Decimal load = 0;
         @AuraEnabled public String  status = 'empty';
+    }
+
+    public class TimelineData {
+        @AuraEnabled public List<TimelineRow> allocations = new List<TimelineRow>();
+        @AuraEnabled public List<ProjectOption> projects = new List<ProjectOption>();
+    }
+
+    public class TimelineRow {
+        @AuraEnabled public Id      id;
+        @AuraEnabled public Id      resourceId;
+        @AuraEnabled public String  resourceName;
+        @AuraEnabled public String  role;
+        @AuraEnabled public Id      projectId;
+        @AuraEnabled public String  projectName;
+        @AuraEnabled public String  wbsItemName;
+        @AuraEnabled public Decimal allocationPercent;
+        @AuraEnabled public Date    startDate;
+        @AuraEnabled public Date    endDate;
+
+        public TimelineRow(Resource_Allocation__c alloc) {
+            this.id                = alloc.Id;
+            this.resourceId        = alloc.Resource__c;
+            this.resourceName      = alloc.Resource__r?.Name;
+            this.role              = alloc.Role__c;
+            this.projectId         = alloc.Project__c;
+            this.projectName       = alloc.Project__r?.Name;
+            this.allocationPercent = alloc.Allocation_Percent__c;
+            this.startDate         = alloc.Start_Date__c;
+            this.endDate           = alloc.End_Date__c;
+            this.wbsItemName       = alloc.WBS_Item__c != null
+                ? (alloc.WBS_Item__r.WBS_Code__c != null ? alloc.WBS_Item__r.WBS_Code__c + ' ' : '') + alloc.WBS_Item__r.Name
+                : null;
+        }
+    }
+
+    public class ProjectOption {
+        @AuraEnabled public Id     id;
+        @AuraEnabled public String name;
+
+        public ProjectOption(Id id, String name) {
+            this.id   = id;
+            this.name = name;
+        }
     }
 }

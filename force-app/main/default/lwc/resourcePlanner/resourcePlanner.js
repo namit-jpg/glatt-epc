@@ -86,7 +86,6 @@ export default class ResourcePlanner extends LightningElement {
     handleRowAction(event) {
         const { name } = event.detail.action;
         const row = event.detail.row;
-
         if (name === 'edit') {
             this.editRecordId = row.id;
             this.modalTitle = `Edit: ${row.resourceName ?? row.name}`;
