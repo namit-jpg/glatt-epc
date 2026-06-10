@@ -37,10 +37,18 @@ All objects are deployed (Feature 0). This is the reference spec.
 - Name: text; WBS_Code__c: text (e.g. "1.1.2")
 - Project__c: master-detail → Project__c
 - Parent_WBS_Item__c: lookup → WBS_Item__c (self-referencing hierarchy); Level__c: number
-- Predecessor__c: lookup → WBS_Item__c; Dependency_Type__c: picklist — FS, SS, FF, SF; Lag_Days__c: number (can be negative)
-- Duration_Days__c: number; Budget__c: currency; Progress__c: percent
-- Start_Date__c, End_Date__c: date
+- Predecessor__c: lookup → WBS_Item__c; Dependency_Type__c: picklist — FS, SS, FF, SF; Lag_Days__c: number (can be negative). **Legacy single-predecessor lookup** — still honored by `CPMEngine`, but multi-predecessor links now live on `WBS_Dependency__c`.
+- Duration_Days__c: number (working days); Budget__c: currency; Progress__c: percent
+- Start_Date__c, End_Date__c: date (manual planning hints)
+- Actual_Start__c, Actual_Finish__c: date — **auto-managed by `CPMEngine`** from progress (start when progress first >0%, finish when 100%, cleared if it drops back; roll up to summaries)
 - CPM fields: Early_Start__c, Early_Finish__c, Late_Start__c, Late_Finish__c (date), Float_Days__c (number), Is_Critical__c (checkbox)
+
+### WBS_Dependency__c
+Junction giving a task **multiple predecessors**, modelled on Microsoft Project.
+- Name: auto-number `DEP-{0000}`
+- Successor__c: master-detail → WBS_Item__c (the dependent task; links cascade-delete with it)
+- Predecessor__c: lookup → WBS_Item__c (SetNull on delete; `WBSItemTrigger` cleans up orphans)
+- Dependency_Type__c: picklist — FS, SS, FF, SF; Lag_Days__c: number (working days, can be negative)
 
 ### Work_Package__c
 - Name: auto-number `WP-{0000}`

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Predecessor__c</fullName>
+    <label>Predecessor</label>
+    <description>The task that drives this link — its start or finish constrains the successor.</description>
+    <type>Lookup</type>
+    <referenceTo>WBS_Item__c</referenceTo>
+    <relationshipName>Successor_Links</relationshipName>
+    <relationshipLabel>Successor Links</relationshipLabel>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+</CustomField>

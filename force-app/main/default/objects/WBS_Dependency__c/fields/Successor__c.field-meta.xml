@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Successor__c</fullName>
+    <label>Successor</label>
+    <description>The dependent task — the one that cannot start/finish until the predecessor condition is met.</description>
+    <type>MasterDetail</type>
+    <referenceTo>WBS_Item__c</referenceTo>
+    <relationshipName>Predecessor_Links</relationshipName>
+    <relationshipLabel>Predecessor Links</relationshipLabel>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    <trackHistory>false</trackHistory>
+</CustomField>

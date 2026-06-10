@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Actual_Finish__c</fullName>
+    <label>Actual Finish</label>
+    <description>Auto-set when progress on this task reaches 100%, cleared if it drops back below. Rolls up to summary tasks as the latest child actual finish once all children are complete.</description>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Date</type>
+</CustomField>

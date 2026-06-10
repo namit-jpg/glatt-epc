@@ -85,7 +85,13 @@ export default class GanttChart extends LightningElement {
             start: t.start,
             end: t.endDate,
             progress: t.progress ?? 0,
-            dependencies: knownIds.has(t.dependencies) ? t.dependencies : '',
+            // dependencies is a comma-separated list of predecessor ids — keep only
+            // those still present in the task list, or Frappe Gantt throws.
+            dependencies: (t.dependencies || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(id => knownIds.has(id))
+                .join(','),
             custom_class: t.isCritical ? 'gantt-critical' : ''
         }));
 

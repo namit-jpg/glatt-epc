@@ -37,13 +37,14 @@
                     <!-- header -->
                     <div class="wbs-header">
                         <div class="wbs-th wbs-col-name" style="text-align:left">WBS Code &amp; Name</div>
-                        <div class="wbs-th wbs-col-dep">Predecessor/Successor</div>
-                        <div class="wbs-th wbs-col-pred">Predecessor</div>
-                        <div class="wbs-th wbs-col-dur num">Duration</div>
+                        <div class="wbs-th wbs-col-pred">Pred.</div>
+                        <div class="wbs-th wbs-col-dur num">Dur.</div>
                         <div class="wbs-th wbs-col-budget num">Budget</div>
                         <div class="wbs-th wbs-col-progress th-progress">Progress</div>
-                        <div class="wbs-th wbs-col-start">Start Date</div>
-                        <div class="wbs-th wbs-col-end">End Date</div>
+                        <div class="wbs-th wbs-col-start">Planned Start</div>
+                        <div class="wbs-th wbs-col-end">Planned End</div>
+                        <div class="wbs-th wbs-col-start">Actual Start</div>
+                        <div class="wbs-th wbs-col-end">Actual End</div>
                         <div class="wbs-th wbs-col-float num">Float (d)</div>
                         <div class="wbs-th wbs-col-actions"></div>
                     </div>
@@ -77,11 +78,8 @@
                                 </div>
                             </div>
 
-                            <!-- dependency type -->
-                            <div class="wbs-td wbs-col-dep">{row.depTypeFull}</div>
-
-                            <!-- predecessor code -->
-                            <div class="wbs-td wbs-col-pred">{row.predecessorCode}</div>
+                            <!-- predecessor: code + type abbreviation -->
+                            <div class="wbs-td wbs-col-pred">{row.predSummary}</div>
 
                             <!-- duration -->
                             <div class="wbs-td wbs-col-dur num">{row.durationDays}</div>
@@ -102,11 +100,17 @@
                                 <span class="progress-pct">{row.progressLabel}</span>
                             </div>
 
-                            <!-- start date -->
+                            <!-- planned start -->
                             <div class="wbs-td wbs-col-start">{row.startFormatted}</div>
 
-                            <!-- end date -->
+                            <!-- planned end -->
                             <div class="wbs-td wbs-col-end">{row.endFormatted}</div>
+
+                            <!-- actual start -->
+                            <div class="wbs-td wbs-col-start wbs-actual">{row.actualStartFmt}</div>
+
+                            <!-- actual end -->
+                            <div class="wbs-td wbs-col-end wbs-actual">{row.actualEndFmt}</div>
 
                             <!-- float -->
                             <div class="wbs-td wbs-col-float num">{row.floatDisplay}</div>
@@ -121,6 +125,17 @@
                                     variant="border-filled"
                                     class="action-btn"
                                     onclick={handleAddChild}
+                                    data-id={row.id}
+                                    data-label={row.name}>
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:link"
+                                    title="Manage Predecessors"
+                                    alternative-text="Manage Predecessors"
+                                    size="xx-small"
+                                    variant="border-filled"
+                                    class="action-btn"
+                                    onclick={handleManageDeps}
                                     data-id={row.id}
                                     data-label={row.name}>
                                 </lightning-button-icon>
@@ -450,6 +465,113 @@
 
                 <footer class="slds-modal__footer">
                     <lightning-button label="Close" onclick={closeResourceModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Manage Predecessors Modal -->
+    <template lwc:if={showDepModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                        onclick={closeDepModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">Manage Predecessors</h2>
+                    <p class="slds-m-top_xx-small" style="color:rgba(255,255,255,.75);font-size:.8125rem;">{depWbsItemName}</p>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium">
+
+                    <template lwc:if={isLoadingDeps}>
+                        <div class="slds-align_absolute-center slds-p-around_medium">
+                            <lightning-spinner alternative-text="Loading dependencies" size="small"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasDependencies}>
+                        <ul class="slds-has-dividers_bottom-space">
+                            <template for:each={dependencies} for:item="dep">
+                                <li key={dep.id} class="slds-item slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-vertical_xx-small">
+                                    <div class="slds-truncate">
+                                        <span class="slds-text-body_regular slds-text-title_bold">{dep.predLabel}</span>
+                                        <div class="slds-text-body_small slds-text-color_weak">
+                                            <span>{dep.typeLabel}</span>
+                                            <template lwc:if={dep.lagLabel}>
+                                                <span class="slds-m-left_small">{dep.lagLabel}</span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <lightning-button-icon
+                                        icon-name="utility:delete"
+                                        title="Remove"
+                                        alternative-text="Remove"
+                                        size="x-small"
+                                        variant="border-filled"
+                                        onclick={handleDepDelete}
+                                        data-id={dep.id}
+                                        data-label={dep.predLabel}>
+                                    </lightning-button-icon>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+
+                    <template lwc:if={isDependenciesEmpty}>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-p-vertical_x-small">
+                            No predecessors yet. Add one to drive this task's schedule.
+                        </p>
+                    </template>
+
+                    <!-- Add predecessor -->
+                    <template lwc:if={showDepForm}>
+                        <div class="slds-box slds-box_x-small slds-m-top_small">
+                            <lightning-record-edit-form
+                                class="dep-edit-form"
+                                object-api-name="WBS_Dependency__c"
+                                onsubmit={handleDepSubmit}
+                                onsuccess={handleDepSaveSuccess}
+                                onerror={handleDepSaveError}>
+                                <lightning-messages></lightning-messages>
+                                <div class="slds-grid slds-wrap slds-gutters_small">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <lightning-input-field field-name="Predecessor__c" required></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Dependency_Type__c"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="Lag_Days__c"></lightning-input-field>
+                                    </div>
+                                </div>
+                                <div class="slds-m-top_small slds-text-align_right">
+                                    <lightning-button type="submit" label="Add" variant="brand"></lightning-button>
+                                </div>
+                            </lightning-record-edit-form>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="slds-m-top_small">
+                            <lightning-button
+                                label="Add Predecessor"
+                                icon-name="utility:add"
+                                variant="neutral"
+                                onclick={handleShowDepForm}>
+                            </lightning-button>
+                        </div>
+                    </template>
+
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={closeDepModal}></lightning-button>
                 </footer>
             </div>
         </section>

@@ -139,6 +139,32 @@
         <object>RFQ__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>WBS_Dependency__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
+    <!-- WBS_Dependency__c Field Permissions (Successor__c is master-detail — no FLS) -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WBS_Dependency__c.Predecessor__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WBS_Dependency__c.Dependency_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WBS_Dependency__c.Lag_Days__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 
     <!-- Project__c Field Permissions -->
     <fieldPermissions>
@@ -193,6 +219,16 @@
     </fieldPermissions>
 
     <!-- WBS_Item__c Field Permissions -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WBS_Item__c.Actual_Start__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WBS_Item__c.Actual_Finish__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>WBS_Item__c.Budget__c</field>

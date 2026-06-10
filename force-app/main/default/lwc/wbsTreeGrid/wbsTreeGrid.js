@@ -7,6 +7,8 @@ import runCPM from '@salesforce/apex/WBSTreeController.runCPM';
 import saveProgress from '@salesforce/apex/WBSTreeController.saveProgress';
 import getAllocationsForWBSItem from '@salesforce/apex/ResourceAllocationController.getAllocationsForWBSItem';
 import deleteAllocation from '@salesforce/apex/ResourceAllocationController.deleteAllocation';
+import getDependencies from '@salesforce/apex/WBSTreeController.getDependencies';
+import deleteDependency from '@salesforce/apex/WBSTreeController.deleteDependency';
 
 const DEP_LABELS = {
     FS: 'Finish-to-Start (FS)',
@@ -15,10 +17,12 @@ const DEP_LABELS = {
     SF: 'Start-to-Finish (SF)'
 };
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(d) {
     if (!d) return '';
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d));
-    return m ? `${m[3]}-${m[2]}-${m[1]}` : String(d);
+    if (!m) return String(d);
+    return `${parseInt(m[3],10)}-${MONTHS[parseInt(m[2],10)-1]}-${m[1].slice(2)}`;
 }
 
 function fmtCurrency(v) {
@@ -51,6 +55,20 @@ export default class WbsTreeGrid extends LightningElement {
     @track resourceAllocations = [];
     @track isLoadingAllocations = false;
     @track showAllocForm = false;
+
+    // Dependency (predecessor) modal state
+    @track showDepModal = false;
+    @track depWbsItemId;
+    @track depWbsItemName;
+    @track dependencies = [];
+    @track isLoadingDeps = false;
+    @track showDepForm = false;
+    DEP_TYPE_OPTIONS = [
+        { label: 'Finish-to-Start (FS)', value: 'FS' },
+        { label: 'Start-to-Start (SS)',  value: 'SS' },
+        { label: 'Finish-to-Finish (FF)', value: 'FF' },
+        { label: 'Start-to-Finish (SF)', value: 'SF' }
+    ];
 
     _wiredResult;
     _expandedIds = new Set();
@@ -128,9 +146,15 @@ export default class WbsTreeGrid extends LightningElement {
                 predecessorCode:  n.predecessorCode ?? '',
                 depTypeFull:      n.depTypeFull ?? '',
                 budgetFormatted:  fmtCurrency(n.budget),
+                predSummary:      n.predecessorCode
+                                    ? (n.predecessorCode + (n.dependencyType && n.dependencyType !== 'FS' ? ' ' + n.dependencyType : ''))
+                                    : (n.predecessorCount > 0 ? `(${n.predecessorCount})` : ''),
                 floatDisplay:     n.floatDays != null ? String(n.floatDays) : '',
                 startFormatted:   fmtDate(n.displayStart),
                 endFormatted:     fmtDate(n.displayEnd),
+                actualStartFmt:   fmtDate(n.actualStart),
+                actualEndFmt:     fmtDate(n.actualFinish),
+                depCount:         n.predecessorCount > 0 ? String(n.predecessorCount) : '',
                 progressRaw:      Math.round(pct),
                 isCritical,
                 rowClass:         cls,
@@ -358,6 +382,91 @@ export default class WbsTreeGrid extends LightningElement {
         this.resourceWbsItemName = undefined;
         this.resourceAllocations = [];
         this.showAllocForm       = false;
+    }
+
+    // ── Dependency (predecessor) modal ───────────────────────────────────
+
+    handleManageDeps(event) {
+        this.depWbsItemId   = event.currentTarget.dataset.id;
+        this.depWbsItemName = event.currentTarget.dataset.label;
+        this.showDepForm    = false;
+        this.showDepModal   = true;
+        this.loadDependencies();
+    }
+
+    async loadDependencies() {
+        this.isLoadingDeps = true;
+        try {
+            const rows = await getDependencies({ wbsItemId: this.depWbsItemId });
+            this.dependencies = rows.map(d => ({
+                ...d,
+                predLabel: [d.predecessorCode, d.predecessorName].filter(Boolean).join(' '),
+                typeLabel: (this.DEP_TYPE_OPTIONS.find(o => o.value === d.dependencyType) || {}).label
+                           || d.dependencyType,
+                lagLabel:  d.lagDays ? `${d.lagDays}d lag` : ''
+            }));
+        } catch (e) {
+            this.toast('Error', e.body?.message ?? 'Failed to load dependencies', 'error');
+        } finally {
+            this.isLoadingDeps = false;
+        }
+    }
+
+    get hasDependencies()     { return this.dependencies.length > 0; }
+    get isDependenciesEmpty() { return !this.isLoadingDeps && this.dependencies.length === 0; }
+
+    handleShowDepForm() {
+        this.showDepForm = true;
+    }
+
+    handleDepSubmit(event) {
+        event.preventDefault();
+        const fields = { ...event.detail.fields };
+        fields.Successor__c = this.depWbsItemId;
+        if (!fields.Dependency_Type__c) fields.Dependency_Type__c = 'FS';
+        this.template.querySelector('.dep-edit-form').submit(fields);
+    }
+
+    async handleDepSaveSuccess() {
+        this.showDepForm = false;
+        this.toast('Saved', 'Predecessor added', 'success');
+        await this.loadDependencies();
+        await this.recalcAfterDepChange();
+    }
+
+    handleDepSaveError(event) {
+        this.toast('Save Error', event.detail?.message ?? 'Save failed', 'error');
+    }
+
+    async handleDepDelete(event) {
+        const id    = event.currentTarget.dataset.id;
+        const label = event.currentTarget.dataset.label;
+        try {
+            await deleteDependency({ dependencyId: id });
+            this.toast('Deleted', `Predecessor "${label}" removed`, 'success');
+            await this.loadDependencies();
+            await this.recalcAfterDepChange();
+        } catch (e) {
+            this.toast('Error', e.body?.message ?? 'Delete failed', 'error');
+        }
+    }
+
+    // Dependency edits don't fire the WBS trigger, so recalc the schedule explicitly.
+    async recalcAfterDepChange() {
+        try {
+            await runCPM({ projectId: this.recordId });
+            await refreshApex(this._wiredResult);
+        } catch (e) {
+            this.toast('CPM Error', e.body?.message ?? 'Recalculation failed', 'error');
+        }
+    }
+
+    closeDepModal() {
+        this.showDepModal   = false;
+        this.depWbsItemId   = undefined;
+        this.depWbsItemName = undefined;
+        this.dependencies   = [];
+        this.showDepForm    = false;
     }
 
     toast(title, message, variant) {
