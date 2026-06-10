@@ -15,8 +15,8 @@
 
 /* ── Top bar ──────────────────────────────────────────── */
 .rt-topbar {
-    background: linear-gradient(95deg, #032d60 0%, #0b5cab 100%);
-    padding: 1rem 1.5rem;
+    background: transparent;
+    padding: 1.25rem 1.5rem 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -24,33 +24,36 @@
 .rt-topbar-left { display: flex; align-items: center; gap: 0.85rem; }
 .rt-topbar-icon {
     width: 2.4rem; height: 2.4rem;
-    background: rgba(255, 255, 255, 0.16);
+    background: #fff;
+    border: 1px solid var(--rt-border);
     border-radius: 0.55rem;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
-.rt-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0; line-height: 1.2; }
-.rt-subtitle { font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); margin: 0.1rem 0 0; }
+.rt-title { font-size: 1.25rem; font-weight: 700; color: var(--rt-ink); margin: 0; line-height: 1.2; }
+.rt-subtitle { font-size: 0.75rem; color: var(--rt-muted); margin: 0.1rem 0 0; }
 .rt-topbar-right { display: flex; align-items: center; gap: 0.75rem; }
 
 /* Zoom segmented control */
 .rt-zoom-group {
     display: inline-flex;
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--slds-g-color-neutral-base-90, #e9e9e9);
     border-radius: 0.45rem;
     padding: 0.15rem;
     gap: 0.1rem;
 }
 .rt-zoom-btn {
     border: none; background: transparent; cursor: pointer;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--rt-muted);
     font-size: 0.74rem; font-weight: 600;
     padding: 0.3rem 0.7rem; border-radius: 0.35rem;
     transition: background 0.12s, color 0.12s;
 }
-.rt-zoom-btn:hover { color: #fff; }
-.rt-zoom-btn_active { background: #fff; color: #032d60; }
-.rt-refresh { --slds-c-button-color-background: rgba(255,255,255,0.16); }
+.rt-zoom-btn:hover { color: var(--rt-ink); }
+.rt-zoom-btn_active {
+    background: #fff; color: var(--rt-ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
+}
 
 /* ── Controls / KPI strip ─────────────────────────────── */
 .rt-controls {

@@ -13,7 +13,7 @@
                         <p class="dash-subtitle">Live project portfolio · Critical path · Field reports</p>
                     </div>
                 </div>
-                <lightning-button-icon icon-name="utility:refresh" variant="bare-inverse"
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
                     alternative-text="Refresh" title="Refresh" onclick={handleRefresh}
                     disabled={isRefreshing}>
                 </lightning-button-icon>
@@ -42,7 +42,7 @@
 
                 <div class="kpi-card kpi-card_indigo">
                     <div class="kpi-icon">
-                        <lightning-icon icon-name="utility:office" size="small" variant="inverse"></lightning-icon>
+                        <lightning-icon icon-name="utility:apps" size="small" variant="inverse"></lightning-icon>
                     </div>
                     <div class="kpi-meta">
                         <span class="kpi-label">Active Projects</span>
@@ -201,33 +201,33 @@
                         </div>
                     </div>
 
-                    <!-- Budget vs spend -->
-                    <div class="panel panel_compact">
-                        <div class="panel-header">
-                            <lightning-icon icon-name="utility:currency" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                            <span>Budget vs Spend</span>
-                        </div>
-                        <div class="panel-body">
-                            <template for:each={portfolio} for:item="proj">
-                                <div key={proj.id} class="spend-row">
-                                    <div class="spend-row-head">
-                                        <span class="spend-name">{proj.name}</span>
-                                        <span class="spend-nums">{proj.spentLabel} / {proj.budgetLabel}</span>
-                                    </div>
-                                    <div class="prog-track prog-track_sm">
-                                        <div class="prog-fill-orange" style={proj.spentStyle}></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
                 </div><!-- /right-col -->
 
             </div><!-- /main-grid -->
 
-            <!-- Bottom row: critical path + field reports -->
+            <!-- Bottom row: budget vs spend + critical path + field reports -->
             <div class="bottom-grid">
+
+                <!-- Budget vs spend -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <lightning-icon icon-name="utility:currency" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        <span>Budget vs Spend</span>
+                    </div>
+                    <div class="panel-body">
+                        <template for:each={portfolio} for:item="proj">
+                            <div key={proj.id} class="spend-row">
+                                <div class="spend-row-head">
+                                    <span class="spend-name">{proj.name}</span>
+                                    <span class="spend-nums">{proj.spentLabel} / {proj.budgetLabel}</span>
+                                </div>
+                                <div class="prog-track prog-track_sm">
+                                    <div class="prog-fill-orange" style={proj.spentStyle}></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
 
                 <div class="panel">
                     <div class="panel-header">
